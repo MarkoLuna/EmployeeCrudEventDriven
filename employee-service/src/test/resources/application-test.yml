@@ -1,0 +1,12 @@
+####### resource server configuration properties
+spring:
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            issuer-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}
+      resourceserver:
+        jwt:
+          # issuer-uri: false
+          issuer-uri: http://localhost:8081/realms/dev

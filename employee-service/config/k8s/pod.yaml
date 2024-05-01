@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: employee-service
+  labels:
+    app: employee-service
+spec:
+  containers:
+    - name: employee-service
+      image: employee-service
+      imagePullPolicy: IfNotPresent
+      ports:
+        - containerPort: 8080
+      env:
+        - name: APP_NAME
+          value: "employee-service"
+      resources:
+        requests:
+          memory: "1024Mi"
+          cpu: "1000m"
+        limits:
+          memory: "1024Mi"
+          cpu: "1000m"
+      readinessProbe:
+        httpGet:
+          path: /actuator/health
+          port: 8080
+        initialDelaySeconds: 35
+        periodSeconds: 5
+        failureThreshold: 3
+        successThreshold: 1
+      livenessProbe:
+        httpGet:
+          path: /actuator/health
+          port: 8080
+        initialDelaySeconds: 35
+        periodSeconds: 5
+        failureThreshold: 3
+        successThreshold: 1

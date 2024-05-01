@@ -1,0 +1,36 @@
+server:
+  port: 8080
+
+springdoc:
+  packagesToScan: com.employee
+  pathsToMatch: /employees/**
+
+logging:
+  level:
+    org.springframework.security: trace
+
+####### resource server configuration properties
+spring:
+  h2:
+    console:
+      enabled: true
+  jpa:
+    defer-datasource-initialization: true
+    show-sql: true
+    generate-ddl: true
+    hibernate:
+      ddl-auto: create
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: login-app
+            authorization-grant-type: authorization_code
+            scope: openid
+        provider:
+          keycloak:
+            issuer-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081/realms/dev

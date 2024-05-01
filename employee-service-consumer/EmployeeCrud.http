@@ -1,0 +1,85 @@
+# EmployeeCrud
+
+###
+# @name ListEmployees
+GET localhost:8080/employees/0/10
+Authorization: Bearer {{auth_token}}
+
+###
+# @name GetEmployee
+GET localhost:8080/employees/e26b200a-a8d0-11e9-a2a3-2a2ae2dbcce4
+Authorization: Bearer {{auth_token}}
+
+###
+# @name CreateEmployee
+POST localhost:8080/employees
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "firstName": "Mark",
+  "middleInitial": "L",
+  "lastName": "Luna",
+  "dateOfBirth": "17-09-2012",
+  "dateOfEmployment": "17-09-2014"
+}
+
+###
+# @name DeleteEmployee
+DELETE localhost:8080/employees/1d5cf451-ffcd-403a-a8c0-8338d0ce381d
+Authorization: Bearer {{auth_token}}
+
+###
+# @name UpdateEmployee
+PUT localhost:8080/employees/e26b200a-a8d0-11e9-a2a3-2a2ae2dbcce4
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "firstName": "Mark",
+  "middleInitial": "L",
+  "lastName": "Luna",
+  "dateOfBirth": "17-09-2012",
+  "dateOfEmployment": "17-09-2014"
+}
+
+###
+# @name GetToken Master User
+//< {%
+    // TODO: you can add here Pre-request handler
+//%}
+POST http://localhost:8081/realms/master/protocol/openid-connect/token
+Host: keycloak-x:8080
+Content-Type: application/x-www-form-urlencoded
+
+client_id = master-client &
+client_secret = z6vxpf3uzvJLlsErs9oufAyolCYFvEos &
+username = marcosluna &
+password = marco94 &
+grant_type = password
+
+> {%
+    if (response.body != null && response.body.access_token != null) {
+        client.global.set("auth_token", response.body.access_token);
+        // request.variables.set("auth_token", response.body.access_token)
+    }
+%}
+
+###
+# @name GetToken Dev User 2
+POST http://localhost:8081/realms/dev/protocol/openid-connect/token
+Host: keycloak-x:8080
+Content-Type: application/x-www-form-urlencoded
+
+client_id = newClient &
+client_secret = newClientSecret &
+username = john@test.com &
+password = 123 &
+grant_type = password
+
+> {%
+    if (response.body != null && response.body.access_token != null) {
+        client.global.set("auth_token", response.body.access_token);
+        // request.variables.set("auth_token", response.body.access_token)
+    }
+%}
