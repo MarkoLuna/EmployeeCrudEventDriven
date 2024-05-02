@@ -69,7 +69,7 @@ public class EmployeeController {
     @SecurityRequirement(name = "Bearer Authentication")
     public ResponseEntity<EmployeeDto> saveEmployee(
             @Parameter(description = "Employee information for a new employee to be created.")
-            @Valid @RequestBody EmployeeRequest request) {
+            @Valid @RequestBody EmployeeDto request) {
 
         EmployeeDto employee = employeeService.createEmployee(request)
                 .orElseThrow(() -> new InvalidDataException("Employee already exists .."));
@@ -79,7 +79,7 @@ public class EmployeeController {
     @PutMapping(value = "/{id}")
     @SecurityRequirement(name = "Bearer Authentication")
     public ResponseEntity<EmployeeDto> updateEmployee(@PathVariable("id") String employeeId,
-                                                      @Valid @RequestBody EmployeeRequest request) {
+                                                      @Valid @RequestBody EmployeeDto request) {
 
         EmployeeDto employee = employeeService.updateEmployee(employeeId, request);
         return new ResponseEntity<>(employee, HttpStatus.OK);

@@ -1,7 +1,6 @@
 package com.employee.services;
 
 import com.common.employee.dto.EmployeeDto;
-import com.common.employee.dto.EmployeeRequest;
 import com.common.employee.enums.EmployeeStatus;
 import com.common.employee.exceptions.EmployeeNotFound;
 import com.employee.entities.Employee;
@@ -39,7 +38,7 @@ public class EmployeeService {
         return employeeMapper.convert(employee.orElseThrow(() -> new EmployeeNotFound("Unable to find the Employee")));
     }
 
-    public Optional<EmployeeDto> createEmployee(EmployeeRequest req) {
+    public Optional<EmployeeDto> createEmployee(EmployeeDto req) {
         List<Employee> existanEmployee = employeeRepository.findByFirstNameAndMiddleInitialAndLastNameAndStatus(
                 req.firstName(), req.middleInitial(), req.lastName(), EmployeeStatus.ACTIVE);
 
@@ -47,13 +46,12 @@ public class EmployeeService {
             return Optional.empty();
 
         Employee employee = employeeMapper.convert(req);
-        employee.setStatus(EmployeeStatus.ACTIVE);
         employeeRepository.save(employee);
         EmployeeDto employeeDto = employeeMapper.convert(employee);
         return Optional.of(employeeDto);
     }
 
-    public EmployeeDto updateEmployee(String id, EmployeeRequest emplReq) throws EmployeeNotFound {
+    public EmployeeDto updateEmployee(String id, EmployeeDto emplReq) throws EmployeeNotFound {
 
         Optional<Employee> existingEmployee = employeeRepository.findByIdAndStatus(id, EmployeeStatus.ACTIVE);
         Employee employee = existingEmployee.orElseThrow(() -> new EmployeeNotFound("Unable to find the employee"));
@@ -61,7 +59,7 @@ public class EmployeeService {
         employee.setFirstName(emplReq.firstName());
         employee.setLastName(emplReq.lastName());
         employee.setMiddleInitial(emplReq.middleInitial());
-        employee.setStatus(EmployeeStatus.ACTIVE);
+        employee.setStatus(emplReq.status());
         employee.setDateOfBirth(emplReq.dateOfBirth());
         employee.setDateOfEmployment(emplReq.dateOfEmployment());
 

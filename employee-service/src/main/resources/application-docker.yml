@@ -12,3 +12,7 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://keycloak-x:8080/realms/dev
+
+services:
+  employee-service-consumer:
+    base-url: http://employee-service-consumer:8080

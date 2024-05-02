@@ -22,6 +22,7 @@
     <java.version>17</java.version>
     <common-dto.version>0.0.1-SNAPSHOT</common-dto.version>
     <springdoc.version>2.5.0</springdoc.version>
+    <spring-kafka.version>3.1.4</spring-kafka.version>
     <validation.api.version>2.0.1.Final</validation.api.version>
     <maven.checkstyle.version>3.2.2</maven.checkstyle.version>
     <puppycrawl.version>10.11.0</puppycrawl.version>
@@ -44,6 +45,11 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-oauth2-client</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.kafka</groupId>
+      <artifactId>spring-kafka</artifactId>
+      <version>${spring-kafka.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springdoc</groupId>
@@ -77,6 +83,12 @@
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.kafka</groupId>
+      <artifactId>spring-kafka-test</artifactId>
+      <version>${spring-kafka.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

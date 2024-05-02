@@ -34,3 +34,11 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:8081/realms/dev
+
+kafka:
+  consumer:
+    enabled: true
+    group-id: employee-group
+    bootstrap-address: localhost:9092
+    employee-upsert-topic: employee-upsert.v1
+    employee-deletion-topic: employee-deletion.v1

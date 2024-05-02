@@ -33,7 +33,7 @@ import lombok.extern.log4j.Log4j2;
 @ControllerAdvice
 public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler {
 
-    private static final String RESPONSE_ENTITY_ERROR_HEADER = "app-context-error";
+    public static final String RESPONSE_ENTITY_ERROR_HEADER = "app-context-error";
 
     /**
      * Exception to be thrown when validation on an argument annotated with @Valid fails.

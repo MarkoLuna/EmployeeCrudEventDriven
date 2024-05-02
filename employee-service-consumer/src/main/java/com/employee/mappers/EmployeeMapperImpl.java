@@ -27,7 +27,7 @@ public class EmployeeMapperImpl implements EmployeeMapper {
                 .firstName(employee.getFirstName())
                 .lastName(employee.getLastName())
                 .middleInitial(employee.getMiddleInitial())
-                .status(employee.getStatus().name())
+                .status(employee.getStatus())
                 .dateOfBirth(employee.getDateOfBirth())
                 .dateOfEmployment(employee.getDateOfEmployment())
                 .build();
@@ -45,14 +45,14 @@ public class EmployeeMapperImpl implements EmployeeMapper {
     /**
      * {@inheritDoc}
      */
-    public Employee convert(@NotNull EmployeeRequest emplReq) {
+    public Employee convert(@NotNull EmployeeDto employeeDto) {
         Employee employee = new Employee();
-        employee.setFirstName(emplReq.firstName());
-        employee.setLastName(emplReq.lastName());
-        employee.setMiddleInitial(emplReq.middleInitial());
+        employee.setFirstName(employeeDto.firstName());
+        employee.setLastName(employeeDto.lastName());
+        employee.setMiddleInitial(employeeDto.middleInitial());
         employee.setStatus(EmployeeStatus.ACTIVE);
-        employee.setDateOfBirth(emplReq.dateOfBirth());
-        employee.setDateOfEmployment(emplReq.dateOfEmployment());
+        employee.setDateOfBirth(employeeDto.dateOfBirth());
+        employee.setDateOfEmployment(employeeDto.dateOfEmployment());
         return employee;
     }
 

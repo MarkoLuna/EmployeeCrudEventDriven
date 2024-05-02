@@ -2,6 +2,7 @@ package com.common.employee.dto;
 
 import java.time.LocalDate;
 
+import com.common.employee.enums.EmployeeStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -24,5 +25,5 @@ public record EmployeeDto(
         @Schema(description = "employee date of employment", example = "17-09-2012")
         LocalDate dateOfEmployment,
         @Schema(description = "employee status", example = "ACTIVE")
-        String status) {
+        EmployeeStatus status) {
 }

@@ -2,9 +2,9 @@ package com.employee.controllers;
 
 import com.common.employee.dto.EmployeeDto;
 import com.common.employee.dto.EmployeeRequest;
+import com.common.employee.dto.Page;
 import com.common.employee.exceptions.InvalidDataException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -73,7 +73,7 @@ public class EmployeeController {
 
         EmployeeDto employee = employeeService.createEmployee(request)
                 .orElseThrow(() -> new InvalidDataException("Employee already exists .."));
-        return new ResponseEntity<>(employee, HttpStatus.OK);
+        return new ResponseEntity<>(employee, HttpStatus.PROCESSING);
     }
 
     @PutMapping(value = "/{id}")
@@ -82,7 +82,7 @@ public class EmployeeController {
                                                       @Valid @RequestBody EmployeeDto request) {
 
         EmployeeDto employee = employeeService.updateEmployee(employeeId, request);
-        return new ResponseEntity<>(employee, HttpStatus.OK);
+        return new ResponseEntity<>(employee, HttpStatus.PROCESSING);
     }
 
     @DeleteMapping("/{id}")
@@ -94,6 +94,6 @@ public class EmployeeController {
             @PathVariable("id") String employeeId) {
 
         employeeService.deleteEmployee(employeeId);
-        return new ResponseEntity<>("Employee Deleted", HttpStatus.OK);
+        return new ResponseEntity<>("Employee Deleted", HttpStatus.PROCESSING);
     }
 }

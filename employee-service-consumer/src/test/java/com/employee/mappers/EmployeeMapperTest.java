@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(MockitoExtension.class)
 class EmployeeMapperTest {
 
-    private EmployeeMapper employeeMapper = new EmployeeMapperImpl();
+    private final EmployeeMapper employeeMapper = new EmployeeMapperImpl();
 
     @Test
     @DisplayName("Verify the mapping from a single Employee to EmployeeDto")
@@ -71,7 +71,7 @@ class EmployeeMapperTest {
                 "lastName",
                 LocalDate.of(2012, 9, 17),
                 LocalDate.of(2014, 9, 17),
-                "ACTIVE"
+                EmployeeStatus.ACTIVE
         );
     }
 

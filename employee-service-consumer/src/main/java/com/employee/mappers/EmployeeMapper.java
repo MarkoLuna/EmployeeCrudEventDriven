@@ -29,6 +29,6 @@ public interface EmployeeMapper {
       */
     List<EmployeeDto> convert(@NotNull List<Employee> employeeList);
 
-    Employee convert(@NotNull EmployeeRequest emplReq);
+    Employee convert(@NotNull EmployeeDto employeeDto);
 
 }
