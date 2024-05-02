@@ -3,14 +3,14 @@ package com.employee.mappers;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.common.employee.dto.EmployeeDto;
+import com.common.employee.enums.EmployeeStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.employee.dto.EmployeeDto;
 import com.employee.entities.Employee;
-import com.employee.enums.EmployeeStatus;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -1,10 +1,10 @@
 package com.employee.services;
 
-import com.employee.dto.EmployeeDto;
-import com.employee.dto.EmployeeRequest;
+import com.common.employee.dto.EmployeeDto;
+import com.common.employee.dto.EmployeeRequest;
+import com.common.employee.enums.EmployeeStatus;
+import com.common.employee.exceptions.EmployeeNotFound;
 import com.employee.entities.Employee;
-import com.employee.enums.EmployeeStatus;
-import com.employee.exceptions.EmployeeNotFound;
 import com.employee.mappers.EmployeeMapper;
 import com.employee.repositories.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;

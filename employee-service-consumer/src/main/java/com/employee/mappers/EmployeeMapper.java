@@ -2,8 +2,8 @@ package com.employee.mappers;
 
 import java.util.List;
 
-import com.employee.dto.EmployeeDto;
-import com.employee.dto.EmployeeRequest;
+import com.common.employee.dto.EmployeeDto;
+import com.common.employee.dto.EmployeeRequest;
 import com.employee.entities.Employee;
 
 import jakarta.validation.constraints.NotNull;

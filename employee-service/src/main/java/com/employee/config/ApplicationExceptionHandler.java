@@ -2,8 +2,9 @@ package com.employee.config;
 
 import java.util.stream.Collectors;
 
+import com.common.employee.exceptions.EmployeeNotFound;
+import com.common.employee.exceptions.InvalidDataException;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.context.annotation.Primary;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
@@ -19,9 +20,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-
-import com.employee.exceptions.EmployeeNotFound;
-import com.employee.exceptions.InvalidDataException;
 
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.ValidationException;

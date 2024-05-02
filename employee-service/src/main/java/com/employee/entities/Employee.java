@@ -1,6 +1,6 @@
 package com.employee.entities;
 
-import com.employee.enums.EmployeeStatus;
+import com.common.employee.enums.EmployeeStatus;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

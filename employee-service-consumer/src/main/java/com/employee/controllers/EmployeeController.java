@@ -1,5 +1,8 @@
 package com.employee.controllers;
 
+import com.common.employee.dto.EmployeeDto;
+import com.common.employee.dto.EmployeeRequest;
+import com.common.employee.exceptions.InvalidDataException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -15,9 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.employee.dto.EmployeeDto;
-import com.employee.dto.EmployeeRequest;
-import com.employee.exceptions.InvalidDataException;
 import com.employee.services.EmployeeService;
 
 import io.swagger.v3.oas.annotations.Operation;

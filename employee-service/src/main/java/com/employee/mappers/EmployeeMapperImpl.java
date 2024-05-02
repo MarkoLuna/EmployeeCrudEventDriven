@@ -1,14 +1,13 @@
 package com.employee.mappers;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
+import com.common.employee.dto.EmployeeDto;
+import com.common.employee.dto.EmployeeRequest;
+import com.common.employee.enums.EmployeeStatus;
 import org.springframework.stereotype.Service;
 
-import com.employee.dto.EmployeeDto;
-import com.employee.dto.EmployeeRequest;
 import com.employee.entities.Employee;
-import com.employee.enums.EmployeeStatus;
 
 import jakarta.validation.constraints.NotNull;
 
@@ -39,7 +38,7 @@ public class EmployeeMapperImpl implements EmployeeMapper {
     public List<EmployeeDto> convert(@NotNull List<Employee> employeeList) {
         return employeeList.stream()
                 .map(this::convert)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**

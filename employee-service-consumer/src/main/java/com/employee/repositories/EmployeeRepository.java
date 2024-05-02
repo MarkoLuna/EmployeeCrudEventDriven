@@ -1,7 +1,7 @@
 package com.employee.repositories;
 
+import com.common.employee.enums.EmployeeStatus;
 import com.employee.entities.Employee;
-import com.employee.enums.EmployeeStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
