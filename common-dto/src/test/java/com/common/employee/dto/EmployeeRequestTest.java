@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-// TODO fix
 public class EmployeeRequestTest {
 
     private static final LocalDate BASIC_DATE = LocalDate.of(2012, 9, 17);
