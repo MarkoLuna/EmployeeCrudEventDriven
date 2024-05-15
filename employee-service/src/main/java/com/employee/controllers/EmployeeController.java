@@ -1,8 +1,8 @@
 package com.employee.controllers;
 
 import com.common.employee.dto.EmployeeDto;
+import com.common.employee.dto.EmployeePage;
 import com.common.employee.dto.EmployeeRequest;
-import com.common.employee.dto.Page;
 import com.common.employee.exceptions.InvalidDataException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -41,7 +41,7 @@ public class EmployeeController {
     @GetMapping("/{page}/{size}")
     @Operation(summary = "Returns list of all Employees in the system.")
     @SecurityRequirement(name = "Bearer Authentication")
-    public ResponseEntity<Page<EmployeeDto>> list(
+    public ResponseEntity<EmployeePage> list(
             @Parameter(required = true, name = "page",
                     description = "Page number of the employee list to be obtained. Cannot be empty.")
             @PathVariable("page") Integer page,
@@ -49,7 +49,7 @@ public class EmployeeController {
                     description = "Page size of the employee list to be obtained. Cannot be empty.")
             @PathVariable("size") Integer pageSize) {
     	
-        Page<EmployeeDto> employeeDtoList = employeeService.list(page, pageSize);
+        EmployeePage employeeDtoList = employeeService.list(page, pageSize);
         return new ResponseEntity<>(employeeDtoList, HttpStatus.OK);
     }
 

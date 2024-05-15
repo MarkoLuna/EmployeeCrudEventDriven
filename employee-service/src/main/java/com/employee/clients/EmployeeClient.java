@@ -1,7 +1,7 @@
 package com.employee.clients;
 
 import com.common.employee.dto.EmployeeDto;
-import com.common.employee.dto.Page;
+import com.common.employee.dto.EmployeePage;
 import feign.Param;
 import feign.RequestLine;
 
@@ -13,6 +13,6 @@ public interface EmployeeClient {
     Optional<EmployeeDto> getEmployee(@Param("id") String id);
 
     @RequestLine("GET /employees/{page}/{size}")
-    Page<EmployeeDto> listEmployees(@Param("page") Integer page, @Param("size") Integer size);
+    EmployeePage listEmployees(@Param("page") Integer page, @Param("size") Integer size);
 
 }

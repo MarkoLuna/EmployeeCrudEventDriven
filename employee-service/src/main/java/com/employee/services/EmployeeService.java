@@ -31,7 +31,7 @@ public class EmployeeService {
     @Autowired
     private EmployeeMapper employeeMapper;
 
-    public Page<EmployeeDto> list(Integer page, Integer sizePage) {
+    public EmployeePage list(Integer page, Integer sizePage) {
         return employeeClient.listEmployees(page, sizePage);
     }
 

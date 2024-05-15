@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Page {
+public class EmployeePage {
     private int pageNumber;
     private int pageSize;
     long offset;
