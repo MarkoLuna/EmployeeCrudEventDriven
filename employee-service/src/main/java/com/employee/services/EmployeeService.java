@@ -1,6 +1,7 @@
 package com.employee.services;
 
 import com.common.employee.dto.*;
+import com.common.employee.enums.EmployeeOperationType;
 import com.common.employee.exceptions.EmployeeNotFound;
 import com.employee.clients.EmployeeClient;
 import com.employee.mappers.EmployeeMapper;

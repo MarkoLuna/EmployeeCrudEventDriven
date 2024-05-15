@@ -10,10 +10,8 @@
     <relativePath>..</relativePath>
   </parent>
 
-  <groupId>com.employeecrud</groupId>
   <artifactId>employee-service</artifactId>
   <packaging>jar</packaging>
-  <version>0.0.1-SNAPSHOT</version>
 
   <name>Employee Service</name>
   <description>Deployable artifact of Employee Service</description>

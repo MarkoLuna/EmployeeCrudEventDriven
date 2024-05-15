@@ -11,9 +11,7 @@
   </parent>
 
   <artifactId>employee-service-consumer</artifactId>
-  <groupId>com.employeecrud</groupId>
   <packaging>jar</packaging>
-  <version>0.0.1-SNAPSHOT</version>
 
   <name>Employee Service Consumer</name>
   <description>Deployable artifact of Employee Service Consumer</description>

@@ -1,7 +1,7 @@
 package com.employee.services;
 
 import com.common.employee.dto.EmployeeMessage;
-import com.common.employee.dto.EmployeeOperationType;
+import com.common.employee.enums.EmployeeOperationType;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
