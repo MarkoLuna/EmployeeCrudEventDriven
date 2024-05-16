@@ -4,6 +4,8 @@ import java.util.stream.Collectors;
 
 import com.common.employee.exceptions.EmployeeNotFound;
 import com.common.employee.exceptions.InvalidDataException;
+import com.employee.exceptions.EmployeeServiceConsumerException;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -147,6 +149,16 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleException(Exception ex) {
         return responseEntity(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    /**
+     * Implement a handler for a {@link EmployeeServiceConsumerException}.
+     * @param ex the {@link EmployeeServiceConsumerException}
+     * @return {@link ResponseEntity}
+     */
+    @ExceptionHandler(EmployeeServiceConsumerException.class)
+    public ResponseEntity<Object> handleException(EmployeeServiceConsumerException ex) {
+        return responseEntity(ex.getReason(), ex.getStatusCode());
     }
 
     @ExceptionHandler(EmployeeNotFound.class)

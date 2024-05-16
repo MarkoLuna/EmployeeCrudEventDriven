@@ -1,6 +1,7 @@
 package com.employee.services;
 
 import com.common.employee.dto.EmployeeDto;
+import com.common.employee.dto.EmployeeRequest;
 import com.common.employee.enums.EmployeeStatus;
 import com.common.employee.exceptions.EmployeeNotFound;
 import com.employee.entities.Employee;
@@ -36,6 +37,19 @@ public class EmployeeService {
     public EmployeeDto getEmployee(String employeeId) throws EmployeeNotFound {
         Optional<Employee> employee = employeeRepository.findByIdAndStatus(employeeId, EmployeeStatus.ACTIVE);
         return employeeMapper.convert(employee.orElseThrow(() -> new EmployeeNotFound("Unable to find the Employee")));
+    }
+
+    public Optional<EmployeeDto> createEmployee(EmployeeRequest req) {
+        List<Employee> existanEmployee = employeeRepository.findByFirstNameAndMiddleInitialAndLastNameAndStatus(
+                req.firstName(), req.middleInitial(), req.lastName(), EmployeeStatus.ACTIVE);
+
+        if(!existanEmployee.isEmpty())
+            return Optional.empty();
+
+        Employee employee = employeeMapper.convert(req);
+        employeeRepository.save(employee);
+        EmployeeDto employeeDto = employeeMapper.convert(employee);
+        return Optional.of(employeeDto);
     }
 
     public Optional<EmployeeDto> createEmployee(EmployeeDto req) {

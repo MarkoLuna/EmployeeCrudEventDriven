@@ -69,7 +69,7 @@ public class EmployeeController {
     @SecurityRequirement(name = "Bearer Authentication")
     public ResponseEntity<EmployeeDto> saveEmployee(
             @Parameter(description = "Employee information for a new employee to be created.")
-            @Valid @RequestBody EmployeeDto request) {
+            @Valid @RequestBody EmployeeRequest request) {
 
         EmployeeDto employee = employeeService.createEmployee(request)
                 .orElseThrow(() -> new InvalidDataException("Employee already exists .."));

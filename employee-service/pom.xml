@@ -10,6 +10,7 @@
     <relativePath>..</relativePath>
   </parent>
 
+  <groupId>com.employee</groupId>
   <artifactId>employee-service</artifactId>
   <packaging>jar</packaging>
 

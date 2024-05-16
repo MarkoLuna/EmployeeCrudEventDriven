@@ -31,4 +31,6 @@ public interface EmployeeMapper {
 
     Employee convert(@NotNull EmployeeDto employeeDto);
 
+    Employee convert(@NotNull EmployeeRequest employeeDto);
+
 }

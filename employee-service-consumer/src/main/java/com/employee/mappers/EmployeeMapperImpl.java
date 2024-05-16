@@ -56,4 +56,16 @@ public class EmployeeMapperImpl implements EmployeeMapper {
         return employee;
     }
 
+    @Override
+    public Employee convert(EmployeeRequest employeeDto) {
+        Employee employee = new Employee();
+        employee.setFirstName(employeeDto.firstName());
+        employee.setLastName(employeeDto.lastName());
+        employee.setMiddleInitial(employeeDto.middleInitial());
+        employee.setStatus(EmployeeStatus.ACTIVE);
+        employee.setDateOfBirth(employeeDto.dateOfBirth());
+        employee.setDateOfEmployment(employeeDto.dateOfEmployment());
+        return employee;
+    }
+
 }

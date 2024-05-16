@@ -1,13 +1,11 @@
 package com.employee.exceptions;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.web.server.ResponseStatusException;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class EmployeeServiceConsumerException extends RuntimeException {
-    private int httpStatus;
-    private String errorMessage;
+public class EmployeeServiceConsumerException extends ResponseStatusException {
+
+    public EmployeeServiceConsumerException(HttpStatusCode status, String reason) {
+        super(status, reason);
+    }
 }

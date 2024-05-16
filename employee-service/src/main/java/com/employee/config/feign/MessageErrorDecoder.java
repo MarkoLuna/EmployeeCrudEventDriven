@@ -19,7 +19,8 @@ public class MessageErrorDecoder implements ErrorDecoder {
         Optional<String> error = CollectionUtils.isEmpty(errors) ? Optional.empty() : Optional.of(String.join(",", errors));
 
         if (HttpStatus.valueOf(response.status()).is4xxClientError()) {
-            return new EmployeeServiceConsumerException(response.status(), error.orElse( "Bad Request"));
+            return new EmployeeServiceConsumerException(HttpStatus.valueOf(response.status()),
+                    error.orElse( "Error while calling kafka producer, please try again later."));
         } else {
             return errorDecoder.decode(methodKey, response);
         }
