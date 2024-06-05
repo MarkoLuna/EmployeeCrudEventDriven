@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2024 Nextiva, Inc. to Present.
- * All rights reserved.
- */
-
 package com.common.employee.dto;
 
 import java.time.LocalDate;

@@ -24,12 +24,12 @@ public record EmployeeRequest(
         String lastName,
 
         @NotNull
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy", timezone = "UTC")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
         @Schema(description = "employee date of birth", example = "17-09-2012")
         LocalDate dateOfBirth,
 
         @NotNull
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy", timezone = "UTC")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
         @Schema(description = "employee date of employment", example = "17-09-2012")
         LocalDate dateOfEmployment) {
 

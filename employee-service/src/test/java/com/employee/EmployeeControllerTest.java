@@ -1,8 +1,16 @@
 package com.employee;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
+import com.common.employee.dto.EmployeeDto;
+import com.common.employee.dto.EmployeeMessage;
+import com.common.employee.dto.EmployeePage;
 import com.common.employee.dto.EmployeeRequest;
+import com.common.employee.enums.Sort;
+import com.employee.clients.EmployeeClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
@@ -13,10 +21,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.messaging.Message;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -24,6 +36,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
@@ -37,6 +50,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DisplayName("Employee tests")
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@EnableAutoConfiguration(exclude = {KafkaAutoConfiguration.class})
 public class EmployeeControllerTest {
 
     private static final LocalDate BASIC_DATE = LocalDate.of(2012, 9, 17);
@@ -46,6 +60,15 @@ public class EmployeeControllerTest {
 
     @MockBean
     ClientRegistrationRepository registrations;
+
+    @MockBean
+    EmployeeClient employeeClient;
+
+    @MockBean(name = "employeeDeletionKafkaTemplate")
+    KafkaTemplate<String, EmployeeMessage> employeeDeletionKafkaTemplate;
+
+    @MockBean(name = "employeeUpsertKafkaTemplate")
+    KafkaTemplate<String, EmployeeMessage> employeeUpsertKafkaTemplate;
 
     private static ObjectMapper objectMapper = new ObjectMapper();
 
@@ -57,7 +80,14 @@ public class EmployeeControllerTest {
 
     @DisplayName("List all employees")
     @Test
-    public void getAllEmployees() throws Exception {
+    void getAllEmployees() throws Exception {
+        var employeePage = EmployeePage.builder()
+                .pageNumber(0)
+                .sort(Sort.ASCENDING)
+                .pageSize(10)
+                .content(List.of(EmployeeDto.builder().id("id").build()))
+                .build();
+        when(employeeClient.listEmployees(0, 10)).thenReturn(employeePage);
         when(registrations.findByRegistrationId(anyString())).thenReturn(buildClientRegistration());
 
         mockMvc.perform(get("/employees/{page}/{total}", 0, 10)
@@ -69,7 +99,7 @@ public class EmployeeControllerTest {
 
     @DisplayName("Attempt get all employees and has unauthorized status")
     @Test
-    public void getAllEmployeesUnAuthorized() throws Exception {
+    void getAllEmployeesUnAuthorized() throws Exception {
         when(registrations.findByRegistrationId(anyString())).thenReturn(buildClientRegistration());
 
         mockMvc.perform(get("/employees/{page}/{total}", 0, 10)
@@ -79,20 +109,23 @@ public class EmployeeControllerTest {
 
     @DisplayName("Get employee by Id")
     @Test
-    public void getEmployeeById() throws Exception {
+    void getEmployeeById() throws Exception {
+        var employeeId = "e26b1ed4-a8d0-11e9-a2a3-2a2ae2dbcce4";
+        var employeeDto = EmployeeDto.builder().id(employeeId).build();
+        when(employeeClient.getEmployee(employeeId)).thenReturn(Optional.of(employeeDto));
         when(registrations.findByRegistrationId(anyString())).thenReturn(buildClientRegistration());
 
-        mockMvc.perform(get("/employees/{id}", "e26b1ed4-a8d0-11e9-a2a3-2a2ae2dbcce4")
+        mockMvc.perform(get("/employees/{id}", employeeId)
                         .with(jwt())
                 .accept(MediaType.APPLICATION_JSON))
                 // .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value("e26b1ed4-a8d0-11e9-a2a3-2a2ae2dbcce4"));
+                .andExpect(jsonPath("$.id").value(employeeId));
     }
 
     @DisplayName("Get employee by Id with invalid id")
     @Test
-    public void getEmployeeByIdWithInvalidIdThenNotFound() throws Exception {
+    void getEmployeeByIdWithInvalidIdThenNotFound() throws Exception {
         when(registrations.findByRegistrationId(anyString())).thenReturn(buildClientRegistration());
 
         mockMvc.perform(get("/employees/{id}", "invalid-id")
@@ -103,7 +136,9 @@ public class EmployeeControllerTest {
 
     @DisplayName("Create a new employee")
     @Test
-    public void createEmployee() throws Exception {
+    void createEmployee() throws Exception {
+        when(employeeUpsertKafkaTemplate.send(any(Message.class)))
+                .thenReturn(CompletableFuture.completedFuture(null));
         when(registrations.findByRegistrationId(anyString())).thenReturn(buildClientRegistration());
 
         mockMvc.perform(post("/employees")
@@ -111,13 +146,13 @@ public class EmployeeControllerTest {
                 .content(asJsonString(new EmployeeRequest("Gerardo2", "J", "Luna", BASIC_DATE, BASIC_DATE)))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").exists());
+                .andExpect(status().isProcessing())
+                .andExpect(jsonPath("$.id").doesNotExist());
     }
 
     @DisplayName("Create a new employee with invalid request")
     @Test
-    public void createEmployeeWithInvalidRequest() throws Exception {
+    void createEmployeeWithInvalidRequest() throws Exception {
         when(registrations.findByRegistrationId(anyString())).thenReturn(buildClientRegistration());
 
         mockMvc.perform(post("/employees")
@@ -130,7 +165,9 @@ public class EmployeeControllerTest {
 
     @DisplayName("Update employee")
     @Test
-    public void updateEmployee() throws Exception {
+    void updateEmployee() throws Exception {
+        when(employeeUpsertKafkaTemplate.send(any(Message.class)))
+                .thenReturn(CompletableFuture.completedFuture(null));
         when(registrations.findByRegistrationId(anyString())).thenReturn(buildClientRegistration());
 
         mockMvc.perform(put("/employees/{id}", "e26b1ed4-a8d0-11e9-a2a3-2a2ae2dbcce4")
@@ -138,20 +175,22 @@ public class EmployeeControllerTest {
                 .content(asJsonString(new EmployeeRequest("Gerardo", "J", "Luna", BASIC_DATE, BASIC_DATE)))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
+                .andExpect(status().isProcessing())
                 .andExpect(jsonPath("$.firstName").value("Gerardo"))
                 .andExpect(jsonPath("$.lastName").value("Luna"));
     }
 
     @DisplayName("Delete employee")
     @Test
-    public void deleteEmployee() throws Exception {
+    void deleteEmployee() throws Exception {
+        when(employeeDeletionKafkaTemplate.send(any(Message.class)))
+                .thenReturn(CompletableFuture.completedFuture(null));
         when(registrations.findByRegistrationId(anyString())).thenReturn(buildClientRegistration());
 
         mockMvc.perform(delete("/employees/{id}", "e26b1d76-a8d0-11e9-a2a3-2a2ae2dbcce4")
                         .with(jwt())
                 )
-                .andExpect(status().isOk());
+                .andExpect(status().isProcessing());
     }
 
     public static String asJsonString(final Object obj) {

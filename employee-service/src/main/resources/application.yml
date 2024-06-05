@@ -41,6 +41,6 @@ services:
 
 kafka:
   producer:
-    bootstrap-address: localhost:9092
+    bootstrap-servers: localhost:9092
     employee-upsert-topic: employee-upsert.v1
     employee-deletion-topic: employee-deletion.v1

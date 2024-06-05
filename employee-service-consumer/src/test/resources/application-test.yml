@@ -10,3 +10,7 @@ spring:
         jwt:
           # issuer-uri: false
           issuer-uri: http://localhost:8081/realms/dev
+
+kafka:
+  consumer:
+    enabled: false

@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2023 Nextiva, Inc. to Present.
- * All rights reserved.
- */
-
 package com.common.employee.dto;
 
 import java.io.File;

@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "kafka.producer")
 public class KafkaConfigProperties {
 
-    private String bootstrapAddress;
+    private String bootstrapServers;
     private String employeeUpsertTopic;
     private String employeeDeletionTopic;
 }
