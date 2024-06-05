@@ -39,6 +39,11 @@ kafka:
   consumer:
     enabled: true
     group-id: employee-group
-    bootstrap-address: localhost:9092
+    concurrency: 3
+    bootstrap-servers: localhost:9092
     employee-upsert-topic: employee-upsert.v1
     employee-deletion-topic: employee-deletion.v1
+    event-non-blocking-retry:
+      max-attempts: 3
+      period: 5m
+      max-period: 15m

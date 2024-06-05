@@ -86,4 +86,12 @@ public class EmployeeService {
         Employee employee = existanEmployee.orElseThrow(() -> new EmployeeNotFound("Unable to find the employee"));
         employeeRepository.deleteById(employee.getId());
     }
+
+    public boolean employeeMatch(EmployeeDto employee) {
+        Employee employeeEntity = employeeMapper.convert(employee);
+        return employeeRepository.findByIdAndStatus(employee.id(), employee.status())
+                .map(employeeEntity::equals)
+                .orElse(false);
+    }
+
 }
