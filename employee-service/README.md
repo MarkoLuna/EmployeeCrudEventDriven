@@ -8,7 +8,7 @@ Employee Crud using oauth2, web, lombok, H2 DB and others.
 - Swagger url http://localhost:8080/swagger-ui/index.html
 
 ## Prerequisites
-- Open JDK 17
+- Open JDK 21
 
 You can install any version, i.e. [Amazon Corretto](https://docs.aws.amazon.com/corretto/latest/corretto-17-ug/downloads-list.html).
 
