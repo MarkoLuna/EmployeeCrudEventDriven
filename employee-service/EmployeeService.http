@@ -5,6 +5,10 @@
 GET localhost:8080/employees/0/10
 Authorization: Bearer {{auth_token}}
 
+> {%
+    console.log(client.global.get("auth_token"));
+%}
+
 ###
 # @name GetEmployee
 GET localhost:8080/employees/e26b200a-a8d0-11e9-a2a3-2a2ae2dbcce4
@@ -45,11 +49,9 @@ Content-Type: application/json
 
 ###
 # @name GetToken Master User
-//< {%
-    // TODO: you can add here Pre-request handler
-//%}
 POST http://localhost:8081/realms/master/protocol/openid-connect/token
-Host: keycloak-x:8080
+# Host: keycloak-x:8080
+Host: localhost:8081
 Content-Type: application/x-www-form-urlencoded
 
 client_id = master-client &
@@ -60,15 +62,16 @@ grant_type = password
 
 > {%
     if (response.body != null && response.body.access_token != null) {
+        console.log("access token " + response.body.access_token);
         client.global.set("auth_token", response.body.access_token);
-        // request.variables.set("auth_token", response.body.access_token)
     }
 %}
 
 ###
 # @name GetToken Dev User 2
 POST http://localhost:8081/realms/dev/protocol/openid-connect/token
-Host: keycloak-x:8080
+Host: localhost:8081
+# Host: keycloak-x:8080
 Content-Type: application/x-www-form-urlencoded
 
 client_id = newClient &
@@ -80,6 +83,5 @@ grant_type = password
 > {%
     if (response.body != null && response.body.access_token != null) {
         client.global.set("auth_token", response.body.access_token);
-        // request.variables.set("auth_token", response.body.access_token)
     }
 %}

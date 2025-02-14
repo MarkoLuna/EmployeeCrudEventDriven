@@ -86,7 +86,7 @@
         <artifactId>spring-boot-maven-plugin</artifactId>
         <configuration>
           <executable>true</executable>
-          <mainClass>com.employee.EmployeeCrudApplication</mainClass>
+          <mainClass>com.employee.EmployeeServiceApplication</mainClass>
         </configuration>
         <executions>
           <execution>

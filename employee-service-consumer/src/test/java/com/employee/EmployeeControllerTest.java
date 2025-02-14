@@ -34,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = {
-        EmployeeCrudApplication.class,
+        EmployeeConsumerServiceApplication.class,
 })
 @DisplayName("Employee tests")
 @AutoConfigureMockMvc
