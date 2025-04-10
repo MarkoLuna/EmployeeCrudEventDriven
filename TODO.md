@@ -29,3 +29,8 @@
     - [Apache Spark](https://spark.apache.org/examples.html#)
 
 [Spring boot 3 doc](https://docs.spring.io/spring-boot/docs/3.0.0/reference/htmlsingle/#native-image.developing-your-first-application)
+
+[Add ELK stack](https://www.elastic.co/guide/en/elastic-stack-get-started/current/get-started-docker.html)
+[Add Spring Configuration Cloud (SCC)](https://cloud.spring.io/spring-cloud-config/reference/html/)
+- remove UUID from entity and use the one from the database
+- add Class Generation with [Protobuf](https://protobuf.dev/reference/java/java-generated/)
