@@ -107,7 +107,6 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
     }
 
     private ResponseEntity<Object> responseEntity(String responseMessage, HttpStatusCode httpStatus) {
-        log.warn("Exception '{}' status '{}'", responseMessage, httpStatus.value());
         return ResponseEntity
                 .status(httpStatus)
                 .headers(httpHeaders(responseMessage))
@@ -127,7 +126,8 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
      * @return ResponseEntity for the exception.
      */
     @ExceptionHandler({ConstraintViolationException.class, ValidationException.class})
-    public ResponseEntity<Object> handleBadRequest(Exception ex) {
+    public ResponseEntity<Object> handleValidationException(Exception ex) {
+        log.warn("handleValidationException", ex);
         return responseEntity(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
@@ -138,6 +138,7 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
      */
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Object> handleAccessDenied(AccessDeniedException ex) {
+        log.warn("handleAccessDenied", ex);
         return responseEntity(ex.getMessage(), HttpStatus.FORBIDDEN);
     }
 
@@ -148,6 +149,7 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleException(Exception ex) {
+        log.warn("handleException", ex);
         return responseEntity(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -157,19 +159,22 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
      * @return {@link ResponseEntity}
      */
     @ExceptionHandler(EmployeeServiceConsumerException.class)
-    public ResponseEntity<Object> handleException(EmployeeServiceConsumerException ex) {
+    public ResponseEntity<Object> handleEmployeeServiceConsumerException(EmployeeServiceConsumerException ex) {
+        log.warn("handleEmployeeServiceConsumerException", ex);
         return responseEntity(ex.getReason(), ex.getStatusCode());
     }
 
     @ExceptionHandler(EmployeeNotFound.class)
     public final ResponseEntity<Object> handleEmployeeNotFoundException(EmployeeNotFound ex,
                                                                         WebRequest request) {
+        log.warn("handleEmployeeNotFoundException", ex);
         return responseEntity(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(InvalidDataException.class)
     public final ResponseEntity<Object> handleInvalidDataException(InvalidDataException ex,
                                                                    WebRequest request) {
+        log.warn("handleInvalidDataException", ex);
         return responseEntity(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
