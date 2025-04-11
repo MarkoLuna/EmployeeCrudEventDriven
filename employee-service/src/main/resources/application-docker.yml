@@ -11,8 +11,14 @@ spring:
             issuer-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}
       resourceserver:
         jwt:
-          issuer-uri: http://keycloak-x:8080/realms/dev
+          issuer-uri: http://keycloak-x:8080/realms/master
 
 services:
   employee-service-consumer:
     base-url: http://employee-service-consumer:8080
+
+kafka:
+  producer:
+    bootstrap-servers: kafka:9092
+    employee-upsert-topic: employee-upsert.v1
+    employee-deletion-topic: employee-deletion.v1

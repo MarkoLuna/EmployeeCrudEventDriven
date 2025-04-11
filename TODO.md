@@ -35,3 +35,4 @@
 - remove UUID from entity and use the one from the database
 - add Class Generation with [Protobuf](https://protobuf.dev/reference/java/java-generated/)
 - move H2 to MongoDB
+- Migrate [Keycloak docker image](https://www.keycloak.org/getting-started/getting-started-docker)
