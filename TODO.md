@@ -34,3 +34,4 @@
 [Add Spring Configuration Cloud (SCC)](https://cloud.spring.io/spring-cloud-config/reference/html/)
 - remove UUID from entity and use the one from the database
 - add Class Generation with [Protobuf](https://protobuf.dev/reference/java/java-generated/)
+- move H2 to MongoDB
