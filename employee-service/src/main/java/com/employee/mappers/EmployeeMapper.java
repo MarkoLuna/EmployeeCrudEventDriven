@@ -10,6 +10,12 @@ import jakarta.validation.constraints.NotNull;
   */
 public interface EmployeeMapper {
 
+    /**
+     * Converts {@link EmployeeRequest} to {@link EmployeeDto}.
+     *
+     * @param emplReq the employee request
+     * @return the employee dto
+     */
     EmployeeDto convert(@NotNull EmployeeRequest emplReq);
 
 }

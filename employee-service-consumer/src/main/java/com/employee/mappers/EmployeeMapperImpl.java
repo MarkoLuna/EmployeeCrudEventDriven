@@ -1,7 +1,6 @@
 package com.employee.mappers;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.common.employee.dto.EmployeeDto;
 import com.common.employee.dto.EmployeeRequest;
@@ -39,7 +38,7 @@ public class EmployeeMapperImpl implements EmployeeMapper {
     public List<EmployeeDto> convert(@NotNull List<Employee> employeeList) {
         return employeeList.stream()
                 .map(this::convert)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -56,6 +55,9 @@ public class EmployeeMapperImpl implements EmployeeMapper {
         return employee;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Employee convert(EmployeeRequest employeeDto) {
         Employee employee = new Employee();

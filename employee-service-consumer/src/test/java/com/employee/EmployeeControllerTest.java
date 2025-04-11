@@ -53,14 +53,14 @@ public class EmployeeControllerTest {
     private static ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeAll
-    private static void setUp() {
+    static void setUp() {
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.registerModule(new Jdk8Module());
     }
 
     @DisplayName("List all employees")
     @Test
-    public void getAllEmployees() throws Exception {
+    void getAllEmployees() throws Exception {
         when(registrations.findByRegistrationId(anyString())).thenReturn(buildClientRegistration());
 
         mockMvc.perform(get("/employees/{page}/{total}", 0, 10)
@@ -72,7 +72,7 @@ public class EmployeeControllerTest {
 
     @DisplayName("Attempt get all employees and has unauthorized status")
     @Test
-    public void getAllEmployeesUnAuthorized() throws Exception {
+    void getAllEmployeesUnAuthorized() throws Exception {
         when(registrations.findByRegistrationId(anyString())).thenReturn(buildClientRegistration());
 
         mockMvc.perform(get("/employees/{page}/{total}", 0, 10)
@@ -82,7 +82,7 @@ public class EmployeeControllerTest {
 
     @DisplayName("Get employee by Id")
     @Test
-    public void getEmployeeById() throws Exception {
+    void getEmployeeById() throws Exception {
         when(registrations.findByRegistrationId(anyString())).thenReturn(buildClientRegistration());
 
         mockMvc.perform(get("/employees/{id}", "e26b1ed4-a8d0-11e9-a2a3-2a2ae2dbcce4")
@@ -95,7 +95,7 @@ public class EmployeeControllerTest {
 
     @DisplayName("Get employee by Id with invalid id")
     @Test
-    public void getEmployeeByIdWithInvalidIdThenNotFound() throws Exception {
+    void getEmployeeByIdWithInvalidIdThenNotFound() throws Exception {
         when(registrations.findByRegistrationId(anyString())).thenReturn(buildClientRegistration());
 
         mockMvc.perform(get("/employees/{id}", "invalid-id")
@@ -106,7 +106,7 @@ public class EmployeeControllerTest {
 
     @DisplayName("Create a new employee")
     @Test
-    public void createEmployee() throws Exception {
+    void createEmployee() throws Exception {
         when(registrations.findByRegistrationId(anyString())).thenReturn(buildClientRegistration());
 
         mockMvc.perform(post("/employees")
@@ -120,7 +120,7 @@ public class EmployeeControllerTest {
 
     @DisplayName("Create a new employee with invalid request")
     @Test
-    public void createEmployeeWithInvalidRequest() throws Exception {
+    void createEmployeeWithInvalidRequest() throws Exception {
         when(registrations.findByRegistrationId(anyString())).thenReturn(buildClientRegistration());
 
         mockMvc.perform(post("/employees")
@@ -133,7 +133,7 @@ public class EmployeeControllerTest {
 
     @DisplayName("Update employee")
     @Test
-    public void updateEmployee() throws Exception {
+    void updateEmployee() throws Exception {
         when(registrations.findByRegistrationId(anyString())).thenReturn(buildClientRegistration());
 
         mockMvc.perform(put("/employees/{id}", "e26b1ed4-a8d0-11e9-a2a3-2a2ae2dbcce4")
@@ -148,7 +148,7 @@ public class EmployeeControllerTest {
 
     @DisplayName("Delete employee")
     @Test
-    public void deleteEmployee() throws Exception {
+    void deleteEmployee() throws Exception {
         when(registrations.findByRegistrationId(anyString())).thenReturn(buildClientRegistration());
 
         mockMvc.perform(delete("/employees/{id}", "e26b1d76-a8d0-11e9-a2a3-2a2ae2dbcce4")

@@ -29,8 +29,20 @@ public interface EmployeeMapper {
       */
     List<EmployeeDto> convert(@NotNull List<Employee> employeeList);
 
+    /**
+      * Maps {@link EmployeeDto} to {@link Employee}.
+      *
+      * @param employeeDto {@link EmployeeDto} to move
+      * @return {@link Employee} containing the stored data.
+      */
     Employee convert(@NotNull EmployeeDto employeeDto);
 
+    /**
+      * Maps {@link EmployeeRequest} to {@link Employee}.
+      *
+      * @param employeeDto {@link EmployeeRequest} to move
+      * @return {@link Employee} containing the stored data.
+      */
     Employee convert(@NotNull EmployeeRequest employeeDto);
 
 }

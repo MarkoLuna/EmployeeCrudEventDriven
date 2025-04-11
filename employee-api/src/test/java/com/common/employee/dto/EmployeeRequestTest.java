@@ -13,19 +13,19 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class EmployeeRequestTest {
+class EmployeeRequestTest {
 
     private static final LocalDate BASIC_DATE = LocalDate.of(2012, 9, 17);
     private static Validator validator;
 
     @BeforeAll
-    public static void setUpValidator() {
+    static void setUpValidator() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
     }
 
     @Test
-    public void employeeIsEmpty() {
+    void employeeIsEmpty() {
         EmployeeRequest employeeRequest = EmployeeRequest.builder().build();
 
         Set<ConstraintViolation<EmployeeRequest>> constraintViolations = validator.validate(employeeRequest);
@@ -35,7 +35,7 @@ public class EmployeeRequestTest {
     }
 
     @Test
-    public void employeeFirstNameIsEmpty() {
+    void employeeFirstNameIsEmpty() {
         EmployeeRequest employeeRequest = new EmployeeRequest("", "J", "Luna", BASIC_DATE, BASIC_DATE);
 
         Set<ConstraintViolation<EmployeeRequest>> constraintViolations = validator.validate(employeeRequest);
@@ -45,7 +45,7 @@ public class EmployeeRequestTest {
     }
 
     @Test
-    public void employeeLastNameIsEmpty() {
+    void employeeLastNameIsEmpty() {
         EmployeeRequest employeeRequest = new EmployeeRequest("Marcos", "J", "", BASIC_DATE, BASIC_DATE);
 
         Set<ConstraintViolation<EmployeeRequest>> constraintViolations = validator.validate(employeeRequest);
@@ -55,7 +55,7 @@ public class EmployeeRequestTest {
     }
 
     @Test
-    public void employeeMiddleInitialIsEmpty() {
+    void employeeMiddleInitialIsEmpty() {
         EmployeeRequest employeeRequest = new EmployeeRequest("Marcos", "", "Luna", BASIC_DATE, BASIC_DATE);
 
         Set<ConstraintViolation<EmployeeRequest>> constraintViolations = validator.validate(employeeRequest);
@@ -65,7 +65,7 @@ public class EmployeeRequestTest {
     }
 
     @Test
-    public void employeeDateOfEmploymentIsNull() {
+    void employeeDateOfEmploymentIsNull() {
         EmployeeRequest employeeRequest = new EmployeeRequest("Gerardo", "J", "Luna", BASIC_DATE, null);
 
         Set<ConstraintViolation<EmployeeRequest>> constraintViolations = validator.validate(employeeRequest);
@@ -75,7 +75,7 @@ public class EmployeeRequestTest {
     }
 
     @Test
-    public void employeeDateOfBirthIsNull() {
+    void employeeDateOfBirthIsNull() {
         EmployeeRequest employeeRequest = new EmployeeRequest("Gerardo", "J", "Luna", null, BASIC_DATE);
 
         Set<ConstraintViolation<EmployeeRequest>> constraintViolations = validator.validate(employeeRequest);
@@ -85,7 +85,7 @@ public class EmployeeRequestTest {
     }
 
     @Test
-    public void employeeIsValid() {
+    void employeeIsValid() {
         EmployeeRequest employeeRequest = new EmployeeRequest("Gerardo", "J", "Luna", BASIC_DATE, BASIC_DATE);
 
         Set<ConstraintViolation<EmployeeRequest>> constraintViolations = validator.validate(employeeRequest);
