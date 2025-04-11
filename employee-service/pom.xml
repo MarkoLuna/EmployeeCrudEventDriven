@@ -10,7 +10,7 @@
     <relativePath>..</relativePath>
   </parent>
 
-  <groupId>com.employee</groupId>
+  <groupId>com.employeecrud</groupId>
   <artifactId>employee-service</artifactId>
   <packaging>jar</packaging>
 
@@ -19,7 +19,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.employee</groupId>
+      <groupId>com.employeecrud</groupId>
       <artifactId>employee-api</artifactId>
     </dependency>
     <dependency>

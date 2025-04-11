@@ -10,7 +10,7 @@
     <relativePath>..</relativePath>
   </parent>
 
-  <groupId>com.employee</groupId>
+  <groupId>com.employeecrud</groupId>
   <artifactId>employee-service-consumer</artifactId>
   <packaging>jar</packaging>
 
@@ -47,7 +47,7 @@
       <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.employee</groupId>
+      <groupId>com.employeecrud</groupId>
       <artifactId>employee-api</artifactId>
     </dependency>
     <dependency>

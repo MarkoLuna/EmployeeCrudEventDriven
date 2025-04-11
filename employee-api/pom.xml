@@ -11,7 +11,7 @@
     <relativePath>..</relativePath>
   </parent>
 
-  <groupId>com.employee</groupId>
+  <groupId>com.employeecrud</groupId>
   <artifactId>employee-api</artifactId>
   <packaging>jar</packaging>
 
