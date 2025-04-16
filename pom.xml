@@ -27,7 +27,7 @@
         <springboot.version>3.4.4</springboot.version>
         <spring-security.version>6.4.4</spring-security.version>
         <springdoc.version>2.8.6</springdoc.version>
-        <spring-kafka.version>3.3.4</spring-kafka.version>
+        <spring-kafka.version>3.3.0</spring-kafka.version>
         <openfeing.version>13.6</openfeing.version>
         <lombok.version>1.18.38</lombok.version>
         <validation.api.version>2.0.1.Final</validation.api.version>
