@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 echo "Importing master.."
 /opt/bitnami/keycloak/bin/kc.sh import --dir=/import/master --override true 2>/dev/null

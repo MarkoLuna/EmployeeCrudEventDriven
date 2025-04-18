@@ -2,17 +2,17 @@
 
 ###
 # @name ListEmployees
-GET localhost:8080/employees/0/10
+GET localhost:8082/employees/0/10
 Authorization: Bearer {{auth_token}}
 
 ###
 # @name GetEmployee
-GET localhost:8080/employees/e26b200a-a8d0-11e9-a2a3-2a2ae2dbcce4
+GET localhost:8082/employees/e26b200a-a8d0-11e9-a2a3-2a2ae2dbcce4
 Authorization: Bearer {{auth_token}}
 
 ###
 # @name CreateEmployee
-POST localhost:8080/employees
+POST localhost:8082/employees
 Authorization: Bearer {{auth_token}}
 Content-Type: application/json
 
@@ -26,12 +26,12 @@ Content-Type: application/json
 
 ###
 # @name DeleteEmployee
-DELETE localhost:8080/employees/1d5cf451-ffcd-403a-a8c0-8338d0ce381d
+DELETE localhost:8082/employees/1d5cf451-ffcd-403a-a8c0-8338d0ce381d
 Authorization: Bearer {{auth_token}}
 
 ###
 # @name UpdateEmployee
-PUT localhost:8080/employees/e26b200a-a8d0-11e9-a2a3-2a2ae2dbcce4
+PUT localhost:8082/employees/e26b200a-a8d0-11e9-a2a3-2a2ae2dbcce4
 Authorization: Bearer {{auth_token}}
 Content-Type: application/json
 
