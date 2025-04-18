@@ -48,6 +48,11 @@ services:
     depends_on:
       - keycloak-x
       - kafka
+  mongo:
+    image: mongo
+    restart: always
+    ports:
+      - 27017:27017
   keycloak-x-pg:
     container_name: ws-keycloak-x-pg
     image: docker.io/bitnami/postgresql:${KEYCLOAK_POSTGRES_VERSION}
