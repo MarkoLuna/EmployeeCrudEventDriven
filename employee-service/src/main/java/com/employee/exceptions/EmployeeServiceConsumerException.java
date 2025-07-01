@@ -5,7 +5,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 public class EmployeeServiceConsumerException extends ResponseStatusException {
 
-    public EmployeeServiceConsumerException(HttpStatusCode status, String reason) {
-        super(status, reason);
-    }
+  public EmployeeServiceConsumerException(HttpStatusCode status, String reason) {
+    super(status, reason);
+  }
 }

@@ -17,28 +17,29 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class FeignClientsConfig {
 
-    @Bean
-    public ObjectMapper feignObjectMapper() {
-        return new ObjectMapper()
-            .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-            .configure(SerializationFeature.INDENT_OUTPUT, true)
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    }
+  @Bean
+  public ObjectMapper feignObjectMapper() {
+    return new ObjectMapper()
+        .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+        .configure(SerializationFeature.INDENT_OUTPUT, true)
+        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+  }
 
-    @Bean
-    public ErrorDecoder errorDecoder() {
-        return new MessageErrorDecoder();
-    }
+  @Bean
+  public ErrorDecoder errorDecoder() {
+    return new MessageErrorDecoder();
+  }
 
-    @Bean
-    public EmployeeClient employeeClient(@Value("${services.employee-service-consumer.base-url}")
-                                             String employeeServiceConsumerBaseUrl,
-                                         ObjectMapper feignObjectMapper,
-                                         ErrorDecoder errorDecoder) {
-        return Feign.builder()
-                .encoder(new JacksonEncoder(feignObjectMapper))
-                .decoder(new JacksonDecoder(feignObjectMapper))
-                .errorDecoder(errorDecoder)
-                .target(EmployeeClient.class, employeeServiceConsumerBaseUrl);
-    }
+  @Bean
+  public EmployeeClient employeeClient(
+      @Value("${services.employee-service-consumer.base-url}")
+          String employeeServiceConsumerBaseUrl,
+      ObjectMapper feignObjectMapper,
+      ErrorDecoder errorDecoder) {
+    return Feign.builder()
+        .encoder(new JacksonEncoder(feignObjectMapper))
+        .decoder(new JacksonDecoder(feignObjectMapper))
+        .errorDecoder(errorDecoder)
+        .target(EmployeeClient.class, employeeServiceConsumerBaseUrl);
+  }
 }
