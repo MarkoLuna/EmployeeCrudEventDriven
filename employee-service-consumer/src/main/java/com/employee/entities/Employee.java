@@ -7,10 +7,9 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 import lombok.Data;
 import lombok.ToString;
-
-import java.time.LocalDate;
 
 @Data
 @ToString
@@ -18,16 +17,15 @@ import java.time.LocalDate;
 @Table(name = "employee")
 public class Employee {
 
-    @Id
-    private String id;
+  @Id private String id;
 
-    private String firstName;
-    private String middleInitial;
-    private String lastName;
-    private LocalDate dateOfBirth;
-    private LocalDate dateOfEmployment;
+  private String firstName;
+  private String middleInitial;
+  private String lastName;
+  private LocalDate dateOfBirth;
+  private LocalDate dateOfEmployment;
 
-    @Enumerated(EnumType.STRING)
-    @Column(length = 15)
-    private EmployeeStatus status;
+  @Enumerated(EnumType.STRING)
+  @Column(length = 15)
+  private EmployeeStatus status;
 }
