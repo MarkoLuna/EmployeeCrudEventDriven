@@ -31,9 +31,7 @@
         <openfeing.version>13.6</openfeing.version>
         <lombok.version>1.18.38</lombok.version>
         <validation.api.version>2.0.1.Final</validation.api.version>
-        <maven.checkstyle.version>3.6.0</maven.checkstyle.version>
-<!--        <spotless.version>2.44.2</spotless.version>-->
-        <puppycrawl.version>10.23.0</puppycrawl.version>
+        <spotless.version>2.44.2</spotless.version>
         <maven-versions-plugin.version>2.18.0</maven-versions-plugin.version>
         <common.codec.version>1.16.1</common.codec.version>
         <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
@@ -167,51 +165,15 @@
                         </execution>
                     </executions>
                 </plugin>
-<!--                <plugin>-->
-<!--                    <groupId>com.diffplug.spotless</groupId>-->
-<!--                    <artifactId>spotless-maven-plugin</artifactId>-->
-<!--                    <version>${spotless.version}</version>-->
-<!--                    <configuration>-->
-<!--                        <java>-->
-<!--                            <googleJavaFormat/>-->
-<!--                        </java>-->
-<!--                    </configuration>-->
-<!--                </plugin>                -->
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-checkstyle-plugin</artifactId>
-                    <version>${maven.checkstyle.version}</version>
-                    <dependencies>
-                        <dependency>
-                            <groupId>com.puppycrawl.tools</groupId>
-                            <artifactId>checkstyle</artifactId>
-                            <version>${puppycrawl.version}</version>
-                        </dependency>
-                    </dependencies>
+                    <groupId>com.diffplug.spotless</groupId>
+                    <artifactId>spotless-maven-plugin</artifactId>
+                    <version>${spotless.version}</version>
                     <configuration>
-                        <configLocation>file://${project.basedir}/../checkstyle.xml</configLocation>
-                        <consoleOutput>true</consoleOutput>
-                        <sourceDirectories>
-                            <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
-                            <sourceDirectory>${project.build.testSourceDirectory}</sourceDirectory>
-                        </sourceDirectories>
+                        <java>
+                            <googleJavaFormat/>
+                        </java>
                     </configuration>
-                    <executions>
-                        <execution>
-                            <id>check</id>
-                            <phase>verify</phase>
-                            <goals>
-                                <goal>check</goal>
-                            </goals>
-                        </execution>
-                        <execution>
-                            <id>checkstyle</id>
-                            <phase>compile</phase>
-                            <goals>
-                                <goal>checkstyle</goal>
-                            </goals>
-                        </execution>
-                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>

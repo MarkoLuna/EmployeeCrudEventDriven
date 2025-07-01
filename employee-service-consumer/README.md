@@ -21,8 +21,9 @@ You can use the embedded Maven binaries that your IDE offers, or you can install
 mvn versions:display-property-updates 
 ```
 
-### Checkstyle 
+### Spotless
 ```
-mvn checkstyle:checkstyle
+mvn spotless:check
+mvn spotless:apply
 ```
 
