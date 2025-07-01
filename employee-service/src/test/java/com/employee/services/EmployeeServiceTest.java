@@ -109,7 +109,7 @@ class EmployeeServiceTest {
             .build();
     assertThat(employeeService.createEmployee(request)).isNotNull().isEqualTo(Optional.of(expected));
     verify(employeeUpsertKafkaTemplate).send(argThat(
-            (Message message) -> {
+            (Message<EmployeeMessage> message) -> {
               assertThat(message.getPayload()).isNotNull()
                       .isExactlyInstanceOf(EmployeeMessage.class)
                       .extracting("operationType")
@@ -132,11 +132,9 @@ class EmployeeServiceTest {
 
     assertThat(employeeService.updateEmployee(id, req)).isNotNull().isEqualTo(req);
     verify(employeeUpsertKafkaTemplate).send(argThat(
-            (Message message) -> {
+            (Message<EmployeeMessage> message) -> {
               assertThat(message.getPayload()).isNotNull()
-                      .isExactlyInstanceOf(EmployeeMessage.class)
-                      .extracting("operationType")
-                      .isEqualTo(EmployeeOperationType.UPDATE);
+                      .returns(EmployeeOperationType.UPDATE, EmployeeMessage::operationType);
               return true;
             }));
   }
@@ -148,7 +146,7 @@ class EmployeeServiceTest {
     assertThatCode(() -> employeeService.deleteEmployee(id)).doesNotThrowAnyException();
 
     verify(employeeDeletionKafkaTemplate).send(argThat(
-            (Message message) -> {
+            (Message<EmployeeMessage> message) -> {
               assertThat(message.getPayload()).isNotNull()
                       .isExactlyInstanceOf(EmployeeMessage.class)
                       .extracting("operationType")

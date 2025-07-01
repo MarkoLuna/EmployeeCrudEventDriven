@@ -41,7 +41,7 @@ class EmployeeControllerTest {
 
     private MockMvc mockMvc;
 
-    private static ObjectMapper objectMapper = new ObjectMapper();
+    private final static ObjectMapper objectMapper = new ObjectMapper();
 
     @Mock
     private EmployeeService employeeService;

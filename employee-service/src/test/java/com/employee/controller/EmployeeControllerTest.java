@@ -48,7 +48,7 @@ public class EmployeeControllerTest {
     @InjectMocks
     private EmployeeController employeeController;
 
-    private static ObjectMapper objectMapper = new ObjectMapper();
+    private final static ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeAll
     public static void setUp() {

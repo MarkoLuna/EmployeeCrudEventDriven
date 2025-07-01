@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(MockitoExtension.class)
 class EmployeeMapperTest {
 
-    private EmployeeMapper employeeMapper = new EmployeeMapperImpl();
+    private final EmployeeMapper employeeMapper = new EmployeeMapperImpl();
 
     @Test
     @DisplayName("Verify the mapping from EmployeeRequest to EmployeeDto")

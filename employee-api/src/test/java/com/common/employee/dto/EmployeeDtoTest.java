@@ -13,7 +13,7 @@ import com.common.employee.enums.EmployeeStatus;
  * Unit tests for {@link EmployeeDto}
  */
 public class EmployeeDtoTest {
-    public static final LocalDate DEFAULT_DATE = LocalDate.of(2024, 05, 15);
+    public static final LocalDate DEFAULT_DATE = LocalDate.of(2024, 5, 15);
     public static final String EMPLOYEE1_FILENAME = "employee1.json";
 
     public static final EmployeeDto TARGET_EMPLOYEE1 =
