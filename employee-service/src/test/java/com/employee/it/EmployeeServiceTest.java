@@ -25,13 +25,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.Message;
@@ -39,11 +37,10 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @Disabled
-@ExtendWith(SpringExtension.class)
 @SpringBootTest(
     classes = {
       com.employee.EmployeeServiceApplication.class,
@@ -58,14 +55,14 @@ public class EmployeeServiceTest {
 
   @Autowired private MockMvc mockMvc;
 
-  @MockBean ClientRegistrationRepository registrations;
+  @MockitoBean ClientRegistrationRepository registrations;
 
-  @MockBean EmployeeClient employeeClient;
+  @MockitoBean EmployeeClient employeeClient;
 
-  @MockBean(name = "employeeDeletionKafkaTemplate")
+  @MockitoBean(name = "employeeDeletionKafkaTemplate")
   KafkaTemplate<String, EmployeeMessage> employeeDeletionKafkaTemplate;
 
-  @MockBean(name = "employeeUpsertKafkaTemplate")
+  @MockitoBean(name = "employeeUpsertKafkaTemplate")
   KafkaTemplate<String, EmployeeMessage> employeeUpsertKafkaTemplate;
 
   private static ObjectMapper objectMapper = new ObjectMapper();

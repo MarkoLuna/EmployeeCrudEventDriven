@@ -38,8 +38,8 @@ public class KafkaConsumerConfig {
     props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConfigProperties.getBootstrapServers());
     props.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaConfigProperties.getGroupId());
 
-    return new DefaultKafkaConsumerFactory<>(
-        props, new StringDeserializer(), new JsonDeserializer(EmployeeMessage.class));
+    return new DefaultKafkaConsumerFactory<String, EmployeeMessage>(
+        props, new StringDeserializer(), new JsonDeserializer<>(EmployeeMessage.class));
   }
 
   @Bean
@@ -49,8 +49,8 @@ public class KafkaConsumerConfig {
     props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConfigProperties.getBootstrapServers());
     props.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaConfigProperties.getGroupId());
 
-    return new DefaultKafkaConsumerFactory<>(
-        props, new StringDeserializer(), new JsonDeserializer(EmployeeMessage.class));
+    return new DefaultKafkaConsumerFactory<String, EmployeeMessage>(
+        props, new StringDeserializer(), new JsonDeserializer<>(EmployeeMessage.class));
   }
 
   @Bean
