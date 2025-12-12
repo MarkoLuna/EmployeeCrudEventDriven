@@ -1,8 +1,8 @@
 package com.employee.services;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.AssertionsForClassTypes.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.common.employee.dto.EmployeeDto;
 import com.common.employee.dto.EmployeeMessage;
@@ -18,10 +18,13 @@ import com.employee.mappers.EmployeeMapperImpl;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -32,6 +35,8 @@ import org.springframework.messaging.Message;
 @ExtendWith(MockitoExtension.class)
 class EmployeeServiceTest {
   private static final LocalDate BASIC_DATE = LocalDate.of(2012, 9, 17);
+
+  @Captor private ArgumentCaptor<Message<EmployeeMessage>> employeeMessageCaptor;
 
   @Mock private KafkaTemplate<String, EmployeeMessage> employeeDeletionKafkaTemplate;
 
@@ -112,17 +117,18 @@ class EmployeeServiceTest {
     assertThat(employeeService.createEmployee(request))
         .isNotNull()
         .isEqualTo(Optional.of(expected));
-    verify(employeeUpsertKafkaTemplate)
-        .send(
-            argThat(
-                (Message<EmployeeMessage> message) -> {
-                  assertThat(message.getPayload())
-                      .isNotNull()
-                      .isExactlyInstanceOf(EmployeeMessage.class)
-                      .extracting("operationType")
-                      .isEqualTo(EmployeeOperationType.CREATE);
-                  return true;
-                }));
+
+    verify(employeeUpsertKafkaTemplate).send(employeeMessageCaptor.capture());
+
+    assertThat(employeeMessageCaptor.getValue())
+        .as("message should be valid and with CREATE operation")
+        .isNotNull()
+        .extracting(Message::getPayload)
+        .isNotNull()
+        .isExactlyInstanceOf(EmployeeMessage.class)
+        .asInstanceOf(InstanceOfAssertFactories.type(EmployeeMessage.class))
+        .extracting(EmployeeMessage::operationType)
+        .isEqualTo(EmployeeOperationType.CREATE);
   }
 
   @DisplayName("Update employee")
@@ -139,15 +145,25 @@ class EmployeeServiceTest {
             .build();
 
     assertThat(employeeService.updateEmployee(id, req)).isNotNull().isEqualTo(req);
-    verify(employeeUpsertKafkaTemplate)
-        .send(
-            argThat(
-                (Message<EmployeeMessage> message) -> {
-                  assertThat(message.getPayload())
-                      .isNotNull()
-                      .returns(EmployeeOperationType.UPDATE, EmployeeMessage::operationType);
-                  return true;
-                }));
+    verify(employeeUpsertKafkaTemplate).send(employeeMessageCaptor.capture());
+
+    assertThat(employeeMessageCaptor.getValue())
+        .as("message should be valid and with UPDATE operation")
+        .isNotNull()
+        .extracting(Message::getPayload)
+        .isNotNull()
+        .returns(EmployeeOperationType.UPDATE, EmployeeMessage::operationType)
+        .satisfies(
+            employeeMessage -> {
+              assertThat(employeeMessage.employee())
+                  .as("employee information is correct")
+                  .isNotNull()
+                  .returns(req.firstName(), EmployeeDto::firstName)
+                  .returns(req.lastName(), EmployeeDto::lastName)
+                  .returns(req.middleInitial(), EmployeeDto::middleInitial)
+                  .returns(req.dateOfBirth(), EmployeeDto::dateOfBirth)
+                  .returns(req.dateOfEmployment(), EmployeeDto::dateOfEmployment);
+            });
   }
 
   @DisplayName("Delete employee")
@@ -156,16 +172,15 @@ class EmployeeServiceTest {
     var id = "e26b1d76-a8d0-11e9-a2a3-2a2ae2dbcce4";
     assertThatCode(() -> employeeService.deleteEmployee(id)).doesNotThrowAnyException();
 
-    verify(employeeDeletionKafkaTemplate)
-        .send(
-            argThat(
-                (Message<EmployeeMessage> message) -> {
-                  assertThat(message.getPayload())
-                      .isNotNull()
-                      .isExactlyInstanceOf(EmployeeMessage.class)
-                      .extracting("operationType")
-                      .isEqualTo(EmployeeOperationType.DELETE);
-                  return true;
-                }));
+    verify(employeeDeletionKafkaTemplate).send(employeeMessageCaptor.capture());
+    assertThat(employeeMessageCaptor.getValue())
+        .as("message should be valid and with DELETE operation")
+        .isNotNull()
+        .extracting(Message::getPayload)
+        .isNotNull()
+        .isExactlyInstanceOf(EmployeeMessage.class)
+        .asInstanceOf(InstanceOfAssertFactories.type(EmployeeMessage.class))
+        .extracting(EmployeeMessage::operationType)
+        .isEqualTo(EmployeeOperationType.DELETE);
   }
 }

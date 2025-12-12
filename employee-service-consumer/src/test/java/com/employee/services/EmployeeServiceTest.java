@@ -1,7 +1,6 @@
 package com.employee.services;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -19,9 +18,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -30,6 +27,8 @@ import org.springframework.data.domain.PageRequest;
 @ExtendWith(MockitoExtension.class)
 class EmployeeServiceTest {
   private static final LocalDate BASIC_DATE = LocalDate.of(2012, 9, 17);
+
+  @Captor private ArgumentCaptor<Employee> employeeCaptor;
 
   @Mock private EmployeeRepository employeeRepository;
 
@@ -120,7 +119,16 @@ class EmployeeServiceTest {
         .isNotNull()
         .usingRecursiveComparison()
         .isEqualTo(req);
-    verify(employeeRepository).save(any(Employee.class));
+    verify(employeeRepository).save(employeeCaptor.capture());
+
+    assertThat(employeeCaptor.getValue())
+        .as("employee information is correct")
+        .isNotNull()
+        .returns(req.firstName(), Employee::getFirstName)
+        .returns(req.lastName(), Employee::getLastName)
+        .returns(req.middleInitial(), Employee::getMiddleInitial)
+        .returns(req.dateOfBirth(), Employee::getDateOfBirth)
+        .returns(req.dateOfEmployment(), Employee::getDateOfEmployment);
   }
 
   @DisplayName("Delete employee")
