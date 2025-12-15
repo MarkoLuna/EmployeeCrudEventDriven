@@ -12,6 +12,9 @@ docker compose up -d --build --remove-orphans
 docker compose down
 ```
 
+### Keycloak admin console
+[Link](http://localhost:8081/admin)
+
 ### Generate tokens
 
 ```bash
