@@ -1,0 +1,24 @@
+meta {
+  name: ListEmployees
+  type: http
+  seq: 1
+}
+
+get {
+  url: http://localstack.lks.com:8083/employees/0/10
+  body: none
+  auth: bearer
+}
+
+headers {
+  ~Authorization: {{auth_type}} {{auth_token}}
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

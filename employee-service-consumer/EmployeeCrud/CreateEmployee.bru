@@ -1,0 +1,34 @@
+meta {
+  name: CreateEmployee
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:8082/employees
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+body:json {
+  {
+    "firstName": "Mark",
+    "middleInitial": "L",
+    "lastName": "Luna",
+    "dateOfBirth": "17-09-2012",
+    "dateOfEmployment": "17-09-2014"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

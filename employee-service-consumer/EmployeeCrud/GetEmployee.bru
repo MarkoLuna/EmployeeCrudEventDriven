@@ -1,0 +1,20 @@
+meta {
+  name: GetEmployee
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:8082/employees/6952bf406c5e3f0a1b75d04e
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

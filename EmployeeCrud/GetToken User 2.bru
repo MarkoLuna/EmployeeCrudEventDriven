@@ -1,0 +1,38 @@
+meta {
+  name: GetToken User 2
+  type: http
+  seq: 7
+}
+
+post {
+  url: http://localhost:8081/realms/dev/protocol/openid-connect/token
+  body: formUrlEncoded
+  auth: inherit
+}
+
+headers {
+  ~Host: keycloak-x:8080
+}
+
+body:form-urlencoded {
+  client_id: newClient
+  client_secret: newClientSecret
+  username: john@test.com
+  password: 123
+  grant_type: password
+}
+
+script:post-response {
+  var jsonData = res.getBody();
+  if (jsonData["access_token"] != null) {
+      bru.setEnvVar("auth_token", jsonData["access_token"]);
+  }
+  if (jsonData["token_type"] != null) {
+      bru.setEnvVar("auth_type", jsonData["token_type"]);
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

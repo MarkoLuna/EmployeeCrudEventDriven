@@ -1,0 +1,34 @@
+meta {
+  name: UpdateEmployee
+  type: http
+  seq: 6
+}
+
+put {
+  url: localhost:8083/employees/e26b200a-a8d0-11e9-a2a3-2a2ae2dbcce4
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+body:json {
+  {
+    "firstName": "Mark",
+    "middleInitial": "L",
+    "lastName": "Luna",
+    "dateOfBirth": "17-09-2012",
+    "dateOfEmployment": "17-09-2014"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -1,0 +1,19 @@
+meta {
+  name: DeleteEmployee
+  type: http
+  seq: 4
+}
+
+delete {
+  url: localhost:8080/employees/1d5cf451-ffcd-403a-a8c0-8338d0ce381d
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+settings {
+  encodeUrl: true
+}
