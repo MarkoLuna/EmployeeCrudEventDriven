@@ -51,7 +51,7 @@ class EmployeeServiceTest {
 
     var result = employeeService.list(0, 10);
     assertThat(result).isNotNull();
-    assertThat(result.getTotalElements()).isEqualTo(1);
+    assertThat(result.getContent()).isNotEmpty().hasSize(1);
   }
 
   @DisplayName("Get employee by Id")

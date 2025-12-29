@@ -18,6 +18,7 @@ import com.employee.mappers.EmployeeMapperImpl;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executors;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -55,7 +56,8 @@ class EmployeeServiceTest {
             employeeDeletionKafkaTemplate,
             employeeUpsertKafkaTemplate,
             employeeClient,
-            employeeMapper);
+            employeeMapper,
+            Executors.newSingleThreadExecutor());
   }
 
   @DisplayName("List all employees")

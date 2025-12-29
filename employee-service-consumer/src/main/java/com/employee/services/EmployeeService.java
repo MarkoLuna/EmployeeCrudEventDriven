@@ -1,6 +1,7 @@
 package com.employee.services;
 
 import com.common.employee.dto.EmployeeDto;
+import com.common.employee.dto.EmployeePage;
 import com.common.employee.dto.EmployeeRequest;
 import com.common.employee.enums.EmployeeStatus;
 import com.common.employee.exceptions.EmployeeNotFound;
@@ -24,12 +25,14 @@ public class EmployeeService {
 
   @Autowired private EmployeeMapper employeeMapper;
 
-  public Page<EmployeeDto> list(Integer page, Integer sizePage) {
+  public EmployeePage list(Integer page, Integer sizePage) {
     Sort orders = Sort.by(Sort.Direction.DESC, "dateOfEmployment");
     Page<Employee> employeeList =
         employeeRepository.findByStatus(
             EmployeeStatus.ACTIVE, PageRequest.of(page, sizePage, orders));
-    return employeeList.map(employeeMapper::convert);
+    var result = employeeList.map(employeeMapper::convert);
+
+    return EmployeePage.builder().content(result.getContent()).pageSize(result.getSize()).build();
   }
 
   public EmployeeDto getEmployee(String employeeId) throws EmployeeNotFound {

@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.common.employee.dto.EmployeeDto;
+import com.common.employee.dto.EmployeePage;
 import com.common.employee.dto.EmployeeRequest;
 import com.common.employee.exceptions.EmployeeNotFound;
 import com.employee.config.ApplicationExceptionHandler;
@@ -21,8 +22,6 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -64,7 +63,7 @@ class EmployeeControllerTest {
 
     var employees = List.of(EmployeeDto.builder().id("id").build());
     when(employeeService.list(0, 10))
-        .thenReturn(new PageImpl<>(employees, Pageable.ofSize(employees.size()), employees.size()));
+        .thenReturn(EmployeePage.builder().content(employees).pageSize(employees.size()).build());
 
     mockMvc
         .perform(get("/employees/{page}/{total}", 0, 10).accept(MediaType.APPLICATION_JSON))

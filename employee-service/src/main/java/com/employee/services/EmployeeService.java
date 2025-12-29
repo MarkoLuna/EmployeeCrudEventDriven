@@ -6,24 +6,24 @@ import com.common.employee.exceptions.EmployeeNotFound;
 import com.employee.clients.EmployeeClient;
 import com.employee.mappers.EmployeeMapper;
 import java.util.Optional;
-import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.concurrent.Executor;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
+@Log4j2
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class EmployeeService {
 
-  @Autowired private KafkaTemplate<String, EmployeeMessage> employeeDeletionKafkaTemplate;
-
-  @Autowired private KafkaTemplate<String, EmployeeMessage> employeeUpsertKafkaTemplate;
-
-  @Autowired private EmployeeClient employeeClient;
-
-  @Autowired private EmployeeMapper employeeMapper;
+  private final KafkaTemplate<String, EmployeeMessage> employeeDeletionKafkaTemplate;
+  private final KafkaTemplate<String, EmployeeMessage> employeeUpsertKafkaTemplate;
+  private final EmployeeClient employeeClient;
+  private final EmployeeMapper employeeMapper;
+  private final Executor customTaskExecutor;
 
   public EmployeePage list(Integer page, Integer sizePage) {
     return employeeClient.listEmployees(page, sizePage);
@@ -42,7 +42,19 @@ public class EmployeeService {
             .operationType(EmployeeOperationType.CREATE)
             .build();
     Message<EmployeeMessage> message = MessageBuilder.withPayload(employeeMessage).build();
-    employeeUpsertKafkaTemplate.send(message);
+    employeeUpsertKafkaTemplate
+        .send(message)
+        .exceptionally(
+            ex -> {
+              log.warn("Error creating employee async", ex);
+              return null;
+            })
+        .completeAsync(
+            () -> {
+              log.debug("employee created successfully. [employee: {}]", req);
+              return null;
+            },
+            customTaskExecutor);
     return Optional.of(employee);
   }
 
