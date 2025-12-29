@@ -34,3 +34,9 @@
 [Add Spring Configuration Cloud (SCC)](https://cloud.spring.io/spring-cloud-config/reference/html/)
 - add Class Generation with [Protobuf](https://protobuf.dev/reference/java/java-generated/)
 - Migrate [Keycloak docker image](https://www.keycloak.org/getting-started/getting-started-docker)
+
+- create docker compose with kafka-ui
+- create docker compose with kafka-magic
+- create gateway using traefik and socat or nginx
+- [Service Discovery](https://docs.spring.io/spring-cloud-consul/reference/discovery.html)
+- CQRS spring boot
