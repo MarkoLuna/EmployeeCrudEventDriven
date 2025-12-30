@@ -20,6 +20,7 @@
     <dependency>
       <groupId>com.employeecrud</groupId>
       <artifactId>employee-api</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
