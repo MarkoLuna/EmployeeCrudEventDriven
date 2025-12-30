@@ -1,6 +1,7 @@
 package com.employee.services;
 
 import static org.assertj.core.api.AssertionsForClassTypes.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -18,6 +19,7 @@ import com.employee.mappers.EmployeeMapperImpl;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,6 +32,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.messaging.Message;
 
 /** Unit tests for {@link EmployeeService} */
@@ -116,6 +119,8 @@ class EmployeeServiceTest {
             .dateOfEmployment(BASIC_DATE)
             .status(EmployeeStatus.ACTIVE)
             .build();
+    when(employeeUpsertKafkaTemplate.send(any(Message.class)))
+            .thenReturn(CompletableFuture.completedFuture(new SendResult(null, null)));
     assertThat(employeeService.createEmployee(request))
         .isNotNull()
         .isEqualTo(Optional.of(expected));

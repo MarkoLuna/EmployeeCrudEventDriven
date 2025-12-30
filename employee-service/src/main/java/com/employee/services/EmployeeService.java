@@ -44,17 +44,17 @@ public class EmployeeService {
     Message<EmployeeMessage> message = MessageBuilder.withPayload(employeeMessage).build();
     employeeUpsertKafkaTemplate
         .send(message)
-        .exceptionally(
-            ex -> {
-              log.warn("Error creating employee async", ex);
-              return null;
-            })
-        .completeAsync(
-            () -> {
-              log.debug("employee created successfully. [employee: {}]", req);
-              return null;
-            },
-            customTaskExecutor);
+            .whenComplete((result, ex) -> {
+              if (ex == null) {
+                log.debug("employee created successfully. [topic: {}], [partition: {}], [offset: {}], [value: {}]",
+                        result.getRecordMetadata().topic(),
+                        result.getRecordMetadata().partition(),
+                        result.getRecordMetadata().offset(),
+                        result.getProducerRecord().value());
+              } else {
+                log.warn("Failed to send employee record to kafka", ex);
+              }
+            });
     return Optional.of(employee);
   }
 

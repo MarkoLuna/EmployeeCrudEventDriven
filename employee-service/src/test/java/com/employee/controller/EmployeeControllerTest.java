@@ -117,7 +117,7 @@ public class EmployeeControllerTest {
                 .content(asJsonString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isProcessing())
+        .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.id").doesNotExist());
   }
 
@@ -148,7 +148,7 @@ public class EmployeeControllerTest {
                 .content(asJsonString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isProcessing())
+        .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.firstName").value("Gerardo"))
         .andExpect(jsonPath("$.lastName").value("Luna"));
   }
@@ -159,7 +159,7 @@ public class EmployeeControllerTest {
 
     mockMvc
         .perform(delete("/employees/{id}", "e26b1d76-a8d0-11e9-a2a3-2a2ae2dbcce4"))
-        .andExpect(status().isProcessing());
+        .andExpect(status().isAccepted());
   }
 
   public static String asJsonString(final Object obj) {

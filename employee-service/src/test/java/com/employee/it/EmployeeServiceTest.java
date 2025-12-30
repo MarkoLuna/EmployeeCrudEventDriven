@@ -145,7 +145,7 @@ public class EmployeeServiceTest {
                         new EmployeeRequest("Gerardo2", "J", "Luna", BASIC_DATE, BASIC_DATE)))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isProcessing())
+        .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.id").doesNotExist());
   }
 
@@ -180,7 +180,7 @@ public class EmployeeServiceTest {
                         new EmployeeRequest("Gerardo", "J", "Luna", BASIC_DATE, BASIC_DATE)))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isProcessing())
+        .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.firstName").value("Gerardo"))
         .andExpect(jsonPath("$.lastName").value("Luna"));
   }
@@ -194,7 +194,7 @@ public class EmployeeServiceTest {
 
     mockMvc
         .perform(delete("/employees/{id}", "e26b1d76-a8d0-11e9-a2a3-2a2ae2dbcce4").with(jwt()))
-        .andExpect(status().isProcessing());
+        .andExpect(status().isAccepted());
   }
 
   public static String asJsonString(final Object obj) {
