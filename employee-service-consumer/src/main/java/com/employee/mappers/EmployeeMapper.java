@@ -1,12 +1,12 @@
 package com.employee.mappers;
 
 import com.common.employee.dto.EmployeeDto;
-import com.common.employee.dto.EmployeeRequest;
+import com.common.employee.dto.EmployeeInfo;
 import com.employee.entities.Employee;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
-/** Mapper class between {@link EmployeeDto}, {@link Employee} and {@link EmployeeRequest}. */
+/** Mapper class between {@link EmployeeDto}, {@link Employee} and {@link EmployeeInfo}. */
 public interface EmployeeMapper {
 
   /**
@@ -34,10 +34,10 @@ public interface EmployeeMapper {
   Employee convert(@NotNull EmployeeDto employeeDto);
 
   /**
-   * Maps {@link EmployeeRequest} to {@link Employee}.
+   * Maps {@link EmployeeInfo} to {@link Employee}.
    *
-   * @param employeeDto {@link EmployeeRequest} to move
+   * @param info {@link EmployeeInfo} to move
    * @return {@link Employee} containing the stored data.
    */
-  Employee convert(@NotNull EmployeeRequest employeeDto);
+  Employee convert(@NotNull EmployeeInfo info);
 }

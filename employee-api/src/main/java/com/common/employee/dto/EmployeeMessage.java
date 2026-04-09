@@ -6,6 +6,7 @@ import lombok.Builder;
 
 @Builder
 public record EmployeeMessage(
-    @Schema(description = "employee info") EmployeeDto employee,
+    @Schema(description = "employee id") String employeeId,
+    @Schema(description = "employee info") EmployeeInfo employee,
     @Schema(description = "employee operation type", example = "CREATE")
         EmployeeOperationType operationType) {}

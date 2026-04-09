@@ -34,11 +34,10 @@ public class EmployeeService {
     return employee.orElseThrow(() -> new EmployeeNotFound("Unable to find the Employee"));
   }
 
-  public Optional<EmployeeDto> createEmployee(EmployeeRequest req) {
-    EmployeeDto employee = employeeMapper.convert(req);
+  public Optional<EmployeeDto> createEmployee(EmployeeInfo req) {
     var employeeMessage =
         EmployeeMessage.builder()
-            .employee(employee)
+            .employee(req)
             .operationType(EmployeeOperationType.CREATE)
             .build();
     Message<EmployeeMessage> message = MessageBuilder.withPayload(employeeMessage).build();
@@ -55,13 +54,14 @@ public class EmployeeService {
                 log.warn("Failed to send employee record to kafka", ex);
               }
             });
-    return Optional.of(employee);
+    return Optional.of(employeeMapper.convert(req));
   }
 
   public EmployeeDto updateEmployee(String employeeId, EmployeeDto empl) {
     var employeeMessage =
         EmployeeMessage.builder()
-            .employee(empl)
+            .employeeId(employeeId)
+            .employee(employeeMapper.convert(empl))
             .operationType(EmployeeOperationType.UPDATE)
             .build();
     Message<EmployeeMessage> message = MessageBuilder.withPayload(employeeMessage).build();
@@ -72,7 +72,7 @@ public class EmployeeService {
   public void deleteEmployee(String id) {
     var employeeMessage =
         EmployeeMessage.builder()
-            .employee(EmployeeDto.builder().id(id).build())
+            .employeeId(id)
             .operationType(EmployeeOperationType.DELETE)
             .build();
     Message<EmployeeMessage> message = MessageBuilder.withPayload(employeeMessage).build();

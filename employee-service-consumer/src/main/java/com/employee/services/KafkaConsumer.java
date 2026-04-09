@@ -39,7 +39,7 @@ public class KafkaConsumer {
       if (message.operationType() == EmployeeOperationType.CREATE) {
         employeeService.createEmployee(message.employee());
       } else if (message.operationType() == EmployeeOperationType.UPDATE) {
-        employeeService.updateEmployee(message.employee().id(), message.employee());
+        employeeService.updateEmployee(message.employeeId(), message.employee());
       } else {
         log.warn("unable to process record due to the operation type is invalid {}", message);
       }
@@ -65,7 +65,7 @@ public class KafkaConsumer {
       if (recordAlreadyProcessed(nonBlockingAttempts, message)) {
         return;
       }
-      employeeService.deleteEmployee(message.employee().id());
+      employeeService.deleteEmployee(message.employeeId());
       log.traceExit(entry);
     } catch (EmployeeNotFound ex) {
       log.error("Unable to process employee deletion message", ex);
@@ -82,12 +82,12 @@ public class KafkaConsumer {
       log.info(
           "Getting the ms365 event again. delivery attempt: [{}] the employeeId: [{}]",
           () -> deliveryAttempt,
-          () -> message.employee().id());
-      if (employeeService.employeeMatch(message.employee())) {
+          () -> message.employeeId());
+      if (employeeService.employeeMatch(message.employeeId(), message.employee())) {
         log.info(
             "Record Already found, wont process.. delivery attempt: [{}] the employeeId: [{}]",
             () -> deliveryAttempt,
-            () -> message.employee().id());
+            () -> message.employeeId());
         return true;
       }
     }
@@ -100,7 +100,7 @@ public class KafkaConsumer {
    * @param errorMessage the error message to handle.
    */
   public void handleDltForEmployeeDeletion(Message<?> errorMessage) {
-    // TO DO HANDLE DLT
+    // TODO HANDLE DLT
     log.warn("Employee Deletion kafka dlt listener reached, max retrys: {}", errorMessage);
   }
 
@@ -110,7 +110,7 @@ public class KafkaConsumer {
    * @param errorMessage the error message to handle.
    */
   public void handleDltForEmployeeUpsert(Message<?> errorMessage) {
-    // TO DO HANDLE DLT
+    // TODO HANDLE DLT
     log.warn("Employee Upsert kafka dlt listener reached, max retrys: {}", errorMessage);
   }
 }

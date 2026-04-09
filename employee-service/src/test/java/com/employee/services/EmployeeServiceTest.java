@@ -6,9 +6,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.common.employee.dto.EmployeeDto;
+import com.common.employee.dto.EmployeeInfo;
 import com.common.employee.dto.EmployeeMessage;
 import com.common.employee.dto.EmployeePage;
-import com.common.employee.dto.EmployeeRequest;
 import com.common.employee.enums.EmployeeOperationType;
 import com.common.employee.enums.EmployeeStatus;
 import com.common.employee.enums.Sort;
@@ -109,7 +109,7 @@ class EmployeeServiceTest {
   @DisplayName("Create a new employee")
   @Test
   void createEmployee() {
-    var request = new EmployeeRequest("Gerardo2", "J", "Luna", BASIC_DATE, BASIC_DATE);
+    var request = new EmployeeInfo("Gerardo2", "J", "Luna", BASIC_DATE, BASIC_DATE, EmployeeStatus.ACTIVE);
     var expected =
         EmployeeDto.builder()
             .firstName("Gerardo2")
@@ -165,11 +165,11 @@ class EmployeeServiceTest {
               assertThat(employeeMessage.employee())
                   .as("employee information is correct")
                   .isNotNull()
-                  .returns(req.firstName(), EmployeeDto::firstName)
-                  .returns(req.lastName(), EmployeeDto::lastName)
-                  .returns(req.middleInitial(), EmployeeDto::middleInitial)
-                  .returns(req.dateOfBirth(), EmployeeDto::dateOfBirth)
-                  .returns(req.dateOfEmployment(), EmployeeDto::dateOfEmployment);
+                  .returns(req.firstName(), EmployeeInfo::firstName)
+                  .returns(req.lastName(), EmployeeInfo::lastName)
+                  .returns(req.middleInitial(), EmployeeInfo::middleInitial)
+                  .returns(req.dateOfBirth(), EmployeeInfo::dateOfBirth)
+                  .returns(req.dateOfEmployment(), EmployeeInfo::dateOfEmployment);
             });
   }
 

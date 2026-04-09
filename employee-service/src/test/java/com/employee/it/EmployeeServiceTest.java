@@ -8,9 +8,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.common.employee.dto.EmployeeDto;
+import com.common.employee.dto.EmployeeInfo;
 import com.common.employee.dto.EmployeeMessage;
 import com.common.employee.dto.EmployeePage;
-import com.common.employee.dto.EmployeeRequest;
+import com.common.employee.enums.EmployeeStatus;
 import com.common.employee.enums.Sort;
 import com.employee.clients.EmployeeClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -142,7 +143,7 @@ public class EmployeeServiceTest {
                 .with(jwt())
                 .content(
                     asJsonString(
-                        new EmployeeRequest("Gerardo2", "J", "Luna", BASIC_DATE, BASIC_DATE)))
+                        new EmployeeInfo("Gerardo2", "J", "Luna", BASIC_DATE, BASIC_DATE, EmployeeStatus.ACTIVE)))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isAccepted())
@@ -158,7 +159,7 @@ public class EmployeeServiceTest {
         .perform(
             post("/employees")
                 .with(jwt())
-                .content(asJsonString(new EmployeeRequest("", "", "", null, null)))
+                .content(asJsonString(new EmployeeInfo("", "", "", null, null, null)))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
@@ -177,7 +178,7 @@ public class EmployeeServiceTest {
                 .with(jwt())
                 .content(
                     asJsonString(
-                        new EmployeeRequest("Gerardo", "J", "Luna", BASIC_DATE, BASIC_DATE)))
+                        new EmployeeInfo("Gerardo", "J", "Luna", BASIC_DATE, BASIC_DATE, EmployeeStatus.ACTIVE)))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isAccepted())

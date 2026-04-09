@@ -5,8 +5,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.common.employee.dto.EmployeeDto;
+import com.common.employee.dto.EmployeeInfo;
 import com.common.employee.dto.EmployeePage;
-import com.common.employee.dto.EmployeeRequest;
+import com.common.employee.enums.EmployeeStatus;
 import com.common.employee.enums.Sort;
 import com.common.employee.exceptions.EmployeeNotFound;
 import com.employee.config.ApplicationExceptionHandler;
@@ -107,7 +108,7 @@ public class EmployeeControllerTest {
   @DisplayName("Create a new employee")
   @Test
   void createEmployee() throws Exception {
-    var request = new EmployeeRequest("Gerardo2", "J", "Luna", BASIC_DATE, BASIC_DATE);
+    var request = new EmployeeInfo("Gerardo2", "J", "Luna", BASIC_DATE, BASIC_DATE, EmployeeStatus.ACTIVE);
     var responseDto = EmployeeDto.builder().firstName("Gerardo2").build();
     when(employeeService.createEmployee(request)).thenReturn(Optional.of(responseDto));
 
@@ -128,7 +129,7 @@ public class EmployeeControllerTest {
     mockMvc
         .perform(
             post("/employees")
-                .content(asJsonString(new EmployeeRequest("", "", "", null, null)))
+                .content(asJsonString(new EmployeeInfo("", "", "", null, null, null)))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());

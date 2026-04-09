@@ -1,8 +1,8 @@
 package com.employee.controllers;
 
 import com.common.employee.dto.EmployeeDto;
+import com.common.employee.dto.EmployeeInfo;
 import com.common.employee.dto.EmployeePage;
-import com.common.employee.dto.EmployeeRequest;
 import com.common.employee.exceptions.InvalidDataException;
 import com.employee.services.EmployeeService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -78,7 +78,7 @@ public class EmployeeController {
       @Parameter(description = "Employee information for a new employee to be created.")
           @Valid
           @RequestBody
-          EmployeeRequest request) {
+            EmployeeInfo request) {
 
     return employeeService
         .createEmployee(request)

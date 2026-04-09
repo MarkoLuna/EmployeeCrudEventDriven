@@ -3,7 +3,7 @@ package com.employee.mappers;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.common.employee.dto.EmployeeDto;
-import com.common.employee.dto.EmployeeRequest;
+import com.common.employee.dto.EmployeeInfo;
 import com.common.employee.enums.EmployeeStatus;
 import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
@@ -21,7 +21,7 @@ class EmployeeMapperTest {
   @DisplayName("Verify the mapping from EmployeeRequest to EmployeeDto")
   void whenMapFromEmployeeRequest_WithValidObjectToMap_ThenAllFieldsAreCorrectlyMapped() {
     var expected = buildEmployeeDto();
-    var employee = buildEmployeeRequest();
+    var employee = buildEmployeeInfo();
 
     var employeeDto = employeeMapper.convert(employee);
 
@@ -32,14 +32,15 @@ class EmployeeMapperTest {
         .isEqualTo(expected);
   }
 
-  private EmployeeRequest buildEmployeeRequest() {
-    return EmployeeRequest.builder()
-        .firstName("firstName")
-        .lastName("lastName")
-        .middleInitial("middleInitial")
-        .dateOfBirth(LocalDate.of(2012, 9, 17))
-        .dateOfEmployment(LocalDate.of(2014, 9, 17))
-        .build();
+  private EmployeeInfo buildEmployeeInfo() {
+    return EmployeeInfo.builder()
+            .firstName("firstName")
+            .lastName("lastName")
+            .middleInitial("middleInitial")
+            .dateOfBirth(LocalDate.of(2012, 9, 17))
+            .dateOfEmployment(LocalDate.of(2014, 9, 17))
+            .status(EmployeeStatus.ACTIVE)
+            .build();
   }
 
   private EmployeeDto buildEmployeeDto() {

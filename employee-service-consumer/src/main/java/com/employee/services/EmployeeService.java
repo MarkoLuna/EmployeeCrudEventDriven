@@ -1,8 +1,8 @@
 package com.employee.services;
 
 import com.common.employee.dto.EmployeeDto;
+import com.common.employee.dto.EmployeeInfo;
 import com.common.employee.dto.EmployeePage;
-import com.common.employee.dto.EmployeeRequest;
 import com.common.employee.enums.EmployeeStatus;
 import com.common.employee.exceptions.EmployeeNotFound;
 import com.employee.entities.Employee;
@@ -42,7 +42,7 @@ public class EmployeeService {
         employee.orElseThrow(() -> new EmployeeNotFound("Unable to find the Employee")));
   }
 
-  public Optional<EmployeeDto> createEmployee(EmployeeRequest req) {
+  public Optional<EmployeeDto> createEmployee(EmployeeInfo req) {
     List<Employee> existanEmployee =
         employeeRepository.findByFirstNameAndMiddleInitialAndLastNameAndStatus(
             req.firstName(), req.middleInitial(), req.lastName(), EmployeeStatus.ACTIVE);
@@ -55,20 +55,7 @@ public class EmployeeService {
     return Optional.of(employeeDto);
   }
 
-  public Optional<EmployeeDto> createEmployee(EmployeeDto req) {
-    List<Employee> existanEmployee =
-        employeeRepository.findByFirstNameAndMiddleInitialAndLastNameAndStatus(
-            req.firstName(), req.middleInitial(), req.lastName(), EmployeeStatus.ACTIVE);
-
-    if (!existanEmployee.isEmpty()) return Optional.empty();
-
-    Employee employee = employeeMapper.convert(req);
-    employeeRepository.save(employee);
-    EmployeeDto employeeDto = employeeMapper.convert(employee);
-    return Optional.of(employeeDto);
-  }
-
-  public EmployeeDto updateEmployee(String id, EmployeeDto emplReq) throws EmployeeNotFound {
+  public EmployeeDto updateEmployee(String id, EmployeeInfo emplReq) throws EmployeeNotFound {
 
     Optional<Employee> existingEmployee =
         employeeRepository.findByIdAndStatus(id, EmployeeStatus.ACTIVE);
@@ -94,10 +81,12 @@ public class EmployeeService {
     employeeRepository.deleteById(employee.getId());
   }
 
-  public boolean employeeMatch(EmployeeDto employee) {
+  public boolean employeeMatch(String id, EmployeeInfo employee) {
     Employee employeeEntity = employeeMapper.convert(employee);
+    employeeEntity.setId(id);
+
     return employeeRepository
-        .findByIdAndStatus(employee.id(), employee.status())
+        .findByIdAndStatus(id, employee.status())
         .map(employeeEntity::equals)
         .orElse(false);
   }

@@ -5,7 +5,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.common.employee.dto.EmployeeDto;
-import com.common.employee.dto.EmployeeRequest;
+import com.common.employee.dto.EmployeeInfo;
 import com.common.employee.enums.EmployeeStatus;
 import com.common.employee.exceptions.EmployeeNotFound;
 import com.employee.entities.Employee;
@@ -84,7 +84,7 @@ class EmployeeServiceTest {
   @DisplayName("Create a new employee")
   @Test
   void createEmployee() {
-    var request = new EmployeeRequest("Gerardo2", "J", "Luna", BASIC_DATE, BASIC_DATE);
+    var request = new EmployeeInfo("Gerardo2", "J", "Luna", BASIC_DATE, BASIC_DATE, EmployeeStatus.ACTIVE);
     var expected =
         EmployeeDto.builder()
             .firstName("Gerardo2")
@@ -104,8 +104,7 @@ class EmployeeServiceTest {
   void updateEmployee() {
     var id = "e26b1ed4-a8d0-11e9-a2a3-2a2ae2dbcce4";
     var req =
-        EmployeeDto.builder()
-            .id(id)
+        EmployeeInfo.builder()
             .firstName("Gerardo")
             .middleInitial("J")
             .lastName("Luna")
@@ -117,8 +116,13 @@ class EmployeeServiceTest {
         .thenReturn(Optional.of(createEmployeeEntity(id)));
     assertThat(employeeService.updateEmployee(id, req))
         .isNotNull()
-        .usingRecursiveComparison()
-        .isEqualTo(req);
+            .returns(id, EmployeeDto::id)
+            .returns(req.firstName(), EmployeeDto::firstName)
+            .returns(req.lastName(), EmployeeDto::lastName)
+            .returns(req.middleInitial(), EmployeeDto::middleInitial)
+            .returns(req.status(), EmployeeDto::status)
+            .returns(req.dateOfBirth(), EmployeeDto::dateOfBirth)
+            .returns(req.dateOfEmployment(), EmployeeDto::dateOfEmployment);
     verify(employeeRepository).save(employeeCaptor.capture());
 
     assertThat(employeeCaptor.getValue())

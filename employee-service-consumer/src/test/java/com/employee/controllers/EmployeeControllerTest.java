@@ -6,8 +6,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.common.employee.dto.EmployeeDto;
+import com.common.employee.dto.EmployeeInfo;
 import com.common.employee.dto.EmployeePage;
-import com.common.employee.dto.EmployeeRequest;
+import com.common.employee.enums.EmployeeStatus;
 import com.common.employee.exceptions.EmployeeNotFound;
 import com.employee.config.ApplicationExceptionHandler;
 import com.employee.services.EmployeeService;
@@ -100,7 +101,7 @@ class EmployeeControllerTest {
   @Test
   void createEmployee() throws Exception {
 
-    var request = new EmployeeRequest("Gerardo2", "J", "Luna", BASIC_DATE, BASIC_DATE);
+    var request = new EmployeeInfo("Gerardo2", "J", "Luna", BASIC_DATE, BASIC_DATE, EmployeeStatus.ACTIVE);
     var employeeDto =
         EmployeeDto.builder()
             .id("id")
@@ -129,7 +130,7 @@ class EmployeeControllerTest {
     mockMvc
         .perform(
             post("/employees")
-                .content(asJsonString(new EmployeeRequest("", "", "", null, null)))
+                .content(asJsonString(new EmployeeInfo("", "", "", null, null, null)))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
@@ -139,9 +140,8 @@ class EmployeeControllerTest {
   @Test
   void updateEmployee() throws Exception {
     var id = "e26b1ed4-a8d0-11e9-a2a3-2a2ae2dbcce4";
-    var request = new EmployeeRequest("Gerardo", "J", "Luna", BASIC_DATE, BASIC_DATE);
-    var employeeDto =
-        EmployeeDto.builder()
+    var employeeInfo =
+        EmployeeInfo.builder()
             .firstName("Gerardo")
             .middleInitial("J")
             .lastName("Luna")
@@ -149,13 +149,22 @@ class EmployeeControllerTest {
             .dateOfEmployment(BASIC_DATE)
             .build();
 
-    when(employeeService.updateEmployee(id, employeeDto))
-        .thenAnswer(invocationOnMock -> invocationOnMock.getArgument(1));
+    var employeeDto =
+            EmployeeDto.builder()
+                    .firstName("Gerardo")
+                    .middleInitial("J")
+                    .lastName("Luna")
+                    .dateOfBirth(BASIC_DATE)
+                    .dateOfEmployment(BASIC_DATE)
+                    .build();
+
+    when(employeeService.updateEmployee(id, employeeInfo))
+        .thenAnswer(invocationOnMock -> employeeDto);
 
     mockMvc
         .perform(
-            put("/employees/{id}", "e26b1ed4-a8d0-11e9-a2a3-2a2ae2dbcce4")
-                .content(asJsonString(request))
+            put("/employees/{id}", id)
+                .content(asJsonString(employeeInfo))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
