@@ -13,6 +13,10 @@
   <artifactId>employee-service</artifactId>
   <packaging>jar</packaging>
 
+  <properties>
+    <mainClass>com.employee.EmployeeServiceApplication</mainClass>
+  </properties>
+
   <name>Employee Service</name>
   <description>Deployable artifact of Employee Service</description>
 
@@ -90,7 +94,7 @@
         <artifactId>spring-boot-maven-plugin</artifactId>
         <configuration>
           <executable>true</executable>
-          <mainClass>com.employee.EmployeeServiceApplication</mainClass>
+          <mainClass>${mainClass}</mainClass>
         </configuration>
         <executions>
           <execution>

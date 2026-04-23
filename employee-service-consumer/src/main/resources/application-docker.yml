@@ -8,13 +8,36 @@ spring:
       client:
         provider:
           keycloak:
+            client-id: dev-realm
             issuer-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}
       resourceserver:
         jwt:
-          issuer-uri: http://keycloak-x:8080/realms/master
+          issuer-uri: http://localstack.lks.com:8080/realms/dev
+          user-name-attribute: preferred_username
+  data:
+    mongodb:
+      uri: mongodb://mongo:27017/employee_db
+
+spring.security.oauth2.client:
+  registration:
+    dev-realm:
+      provider: keycloak
+      client-id: newClient
+      client-secret: newClientSecret
+      authorization-grant-type: authorization_code
+      scope: openid,profile,email
+      redirect-uri: http://employee-service-consumer:8080/login/oauth2/code/dev-realm
+      client-name: "NSA2 Keycloak"
+      client-authentication-method: client_secret_basic
 
 kafka:
-  producer:
+  consumer:
     bootstrap-servers: kafka:9092
+    group-id: employee-service-consumer
+    concurrency: 1
+    event-non-blocking-retry:
+      max-attempts: 3
+      period: 1s
+      max-period: 1m
     employee-upsert-topic: employee-upsert.v1
     employee-deletion-topic: employee-deletion.v1

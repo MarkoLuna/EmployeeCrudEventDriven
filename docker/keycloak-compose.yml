@@ -10,49 +10,86 @@ volumes:
     driver: local
 
 services:
+  nginx:
+    image: nginx:stable-alpine
+    container_name: nginx-proxy
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    networks:
+      app-network:
+        aliases:
+          - localstack.lks.com
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+
   employee-service:
     build:
       context: ../employee-service/
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "8083:8080"
     environment:
       - "JAVA_OPTS=${JAVA_ARGS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
       - "SPRING_PROFILES_ACTIVE=docker"
     healthcheck:
       test: curl --fail http://localhost:8080/actuator/health || exit 1
-      interval: 5s
+      interval: 30s
       retries: 15
       start_period: 20s
       timeout: 10s
     depends_on:
-      - keycloak-x
-      - kafka
+      keycloak-x:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    extra_hosts:
+      - "localstack.lks.com:host-gateway"
+    networks:
+      - app-network
+
   employee-service-consumer:
     build:
       context: ../employee-service-consumer/
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:
-      - "8081:8080"
+      - "8082:8080"
     environment:
       - "JAVA_OPTS=${JAVA_ARGS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
       - "SPRING_PROFILES_ACTIVE=docker"
     healthcheck:
       test: curl --fail http://localhost:8080/actuator/health || exit 1
-      interval: 5s
+      interval: 30s
       retries: 15
       start_period: 20s
       timeout: 10s
     depends_on:
-      - keycloak-x
-      - kafka
+      keycloak-x:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+    extra_hosts:
+      - "localstack.lks.com:host-gateway"
+    networks:
+       - app-network
+
   mongo:
     image: mongo
     restart: always
     ports:
       - 27017:27017
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
   keycloak-x-pg:
     container_name: ws-keycloak-x-pg
     image: docker.io/postgres:${KEYCLOAK_POSTGRES_VERSION}
@@ -65,6 +102,13 @@ services:
       POSTGRES_PASSWORD: ${KEYCLOAK_POSTGRES_PASSWORD}
     volumes:
       - keycloak-pg-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${KEYCLOAK_POSTGRES_USER} -d ${KEYCLOAK_POSTGRES_DATABASE}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
 
   keycloak-x:
     container_name: ws-keycloak-x
@@ -73,9 +117,10 @@ services:
     restart: unless-stopped
     ports:
       - 8081:8080
+      - 9000:9000
     healthcheck:
-      test: curl --fail http://localhost:8080/ || exit 1
-      interval: 5s
+      test: ["CMD-SHELL", "timeout 5s bash -c ':> /dev/tcp/127.0.0.1/8080' || exit 1"]
+      interval: 30s
       retries: 15
       start_period: 20s
       timeout: 3s
@@ -86,29 +131,56 @@ services:
       KC_DB: postgres
       KC_DB_USERNAME: ${KEYCLOAK_POSTGRES_USER}
       KC_DB_PASSWORD: ${KEYCLOAK_POSTGRES_PASSWORD}
-      KC_HOSTNAME: localhost
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_BACKCHANNEL: "false"
+      KC_HOSTNAME_PORT: 8080
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+      KC_HTTP_MANAGEMENT_PORT: 9000
     volumes:
       - ./keycloak/import/dev-realm:/opt/keycloak/data/import
-#      - ./keycloak/import/master:/opt/keycloak/data/import
-#      - ./keycloak/export:/export
     depends_on:
-      - keycloak-x-pg
+      keycloak-x-pg:
+        condition: service_healthy
+    networks:
+      - app-network
+
   zookeeper:
     image: wurstmeister/zookeeper
     container_name: zookeeper
     ports:
       - "2181:2181"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "2181"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
   kafka:
     image: wurstmeister/kafka
     container_name: kafka
     ports:
       - "9092:9092"
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_healthy
     environment:
-      KAFKA_ADVERTISED_LISTENERS: INSIDE://localhost:9092,OUTSIDE://localhost:9093
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9092,OUTSIDE://localhost:9093
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
       KAFKA_LISTENERS: INSIDE://0.0.0.0:9092,OUTSIDE://0.0.0.0:9093
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_CREATE_TOPICS: "employee-upsert.v1:1:1,employee-deletion.v1:1:1"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "9092"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
