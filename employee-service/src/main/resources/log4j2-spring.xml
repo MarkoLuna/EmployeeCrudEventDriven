@@ -1,0 +1,22 @@
+<Configuration>
+    <Appenders>
+        <Socket name="Logstash" host="logstash" port="5044" protocol="TCP">
+            <JsonLayout compact="true" eventEol="true">
+                <KeyValuePair key="application_name" value="${spring:spring.application.name}"/>
+            </JsonLayout>
+        </Socket>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Root level="info">
+            <SpringProfile name="docker">
+                <AppenderRef ref="Logstash"/>
+            </SpringProfile>
+            <SpringProfile name="!docker">
+                <AppenderRef ref="Console"/>
+            </SpringProfile>
+        </Root>
+    </Loggers>
+</Configuration>

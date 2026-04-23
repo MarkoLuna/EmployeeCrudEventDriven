@@ -45,7 +45,7 @@ Use this mode if you want to run the consumer from your IDE or terminal against 
 ## Useful Endpoints
 - **Health Check**: `http://localhost:8082/actuator/health`
 - **Swagger UI**: `http://localhost:8082/swagger-ui/index.html`
-- **Internal API**: `http://localhost:8082/internal/employees` (Requires valid JWT)
+- **Internal API**: `http://localhost:8082/employees` (Requires valid JWT)
 
 ## Code Quality
 ### Spotless (Formatting)
@@ -58,3 +58,9 @@ mvn spotless:apply
 ```bash
 mvn versions:display-property-updates 
 ```
+
+#### 3. IDE Run Mode
+- Go to Run → Edit Configurations
+- Add Spring Boot configuration for `com.employee.EmployeeConsumerServiceApplication`
+- Set VM options: `-Dspring.profiles.active=docker`
+- Add environment variables (optional)

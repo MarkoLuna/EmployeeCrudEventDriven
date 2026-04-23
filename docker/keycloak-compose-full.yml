@@ -1,0 +1,243 @@
+volumes:
+  keycloak-pg-data:
+    name: keycloak-pg-data
+    driver: local
+  keycloak-pg-preinitdb:
+    name: keycloak-pg-preinitdb
+    driver: local
+  keycloak-pg-initdb:
+    name: keycloak-pg-initdb
+    driver: local
+
+services:
+  nginx:
+    image: nginx:stable-alpine
+    container_name: nginx-proxy
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    networks:
+      app-network:
+        aliases:
+          - localstack.lks.com
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+
+  employee-service:
+    build:
+      context: ../employee-service/
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8083:8080"
+    environment:
+      - "JAVA_OPTS=${JAVA_ARGS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+      - "SPRING_PROFILES_ACTIVE=docker"
+    healthcheck:
+      test: curl --fail http://localhost:8080/actuator/health || exit 1
+      interval: 30s
+      retries: 15
+      start_period: 20s
+      timeout: 10s
+    depends_on:
+      keycloak-x:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    extra_hosts:
+      - "localstack.lks.com:host-gateway"
+    networks:
+      - app-network
+
+  employee-service-consumer:
+    build:
+      context: ../employee-service-consumer/
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8082:8080"
+    environment:
+      - "JAVA_OPTS=${JAVA_ARGS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+      - "SPRING_PROFILES_ACTIVE=docker"
+    healthcheck:
+      test: curl --fail http://localhost:8080/actuator/health || exit 1
+      interval: 30s
+      retries: 15
+      start_period: 20s
+      timeout: 10s
+    depends_on:
+      keycloak-x:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+    extra_hosts:
+      - "localstack.lks.com:host-gateway"
+    networks:
+       - app-network
+
+  mongo:
+    image: mongo
+    restart: always
+    ports:
+      - 27017:27017
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  keycloak-x-pg:
+    container_name: ws-keycloak-x-pg
+    image: docker.io/postgres:${KEYCLOAK_POSTGRES_VERSION}
+    restart: unless-stopped
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: ${KEYCLOAK_POSTGRES_DATABASE}
+      POSTGRES_USER: ${KEYCLOAK_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${KEYCLOAK_POSTGRES_PASSWORD}
+    volumes:
+      - keycloak-pg-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${KEYCLOAK_POSTGRES_USER} -d ${KEYCLOAK_POSTGRES_DATABASE}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  keycloak-x:
+    container_name: ws-keycloak-x
+    image: docker.io/keycloak/keycloak:${KEYCLOAK_VERSION}
+    command: ["start-dev", "--import-realm", "--verbose"]
+    restart: unless-stopped
+    ports:
+      - 8081:8080
+      - 9000:9000
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 5s bash -c ':> /dev/tcp/127.0.0.1/8080' || exit 1"]
+      interval: 30s
+      retries: 15
+      start_period: 20s
+      timeout: 3s
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_USER}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_PASSWORD}
+      KC_DB_URL: jdbc:postgresql://ws-keycloak-x-pg:5432/${KEYCLOAK_POSTGRES_DATABASE}
+      KC_DB: postgres
+      KC_DB_USERNAME: ${KEYCLOAK_POSTGRES_USER}
+      KC_DB_PASSWORD: ${KEYCLOAK_POSTGRES_PASSWORD}
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_BACKCHANNEL: "false"
+      KC_HOSTNAME_PORT: 8080
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+      KC_HTTP_MANAGEMENT_PORT: 9000
+    volumes:
+      - ./keycloak/import/dev-realm:/opt/keycloak/data/import
+    depends_on:
+      keycloak-x-pg:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  zookeeper:
+    image: wurstmeister/zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "2181"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  kafka:
+    image: wurstmeister/kafka
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9092,OUTSIDE://localhost:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:9092,OUTSIDE://0.0.0.0:9093
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CREATE_TOPICS: "employee-upsert.v1:1:1,employee-deletion.v1:1:1"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "9092"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+  
+  ## ELK Stack
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    container_name: elasticsearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+    ports:
+      - "9200:9200"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.15.0
+    container_name: logstash
+    restart: unless-stopped
+    volumes:
+      - ./logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    ports:
+      - "5044:5044"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "5044"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.15.0
+    container_name: kibana
+    restart: unless-stopped
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "5601"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

@@ -1,10 +1,13 @@
-# Infrastructure & Service Dependencies
+## Compose Configurations
 
-This directory contains the Docker Compose configurations and supporting files required to run the infrastructure dependencies for the **Employee CRUD Event-Driven System**.
+This directory provides two main Docker Compose configurations:
+
+1.  **Standard ([keycloak-compose.yml](keycloak-compose.yml))**: Runs the core infrastructure (Kafka, Mongo, Postgres, Keycloak, Nginx) and the Microservices (`employee-service`, `employee-service-consumer`).
+2.  **Full ([keycloak-compose-full.yml](keycloak-compose-full.yml))**: Includes everything in the Standard configuration plus the **ELK Stack** (Elasticsearch, Logstash, Kibana) for centralized logging.
+
+---
 
 ## Services Overview
-
-The [keycloak-compose.yml](keycloak-compose.yml) file manages the following services:
 
 | Service | Technology | Port | Purpose |
 | :--- | :--- | :--- | :--- |
@@ -14,6 +17,15 @@ The [keycloak-compose.yml](keycloak-compose.yml) file manages the following serv
 | **Message Broker**| Kafka | `9092` | Asynchronous event delivery |
 | **Coordinator** | Zookeeper | `2181` | Distributed coordination for Kafka |
 | **Reverse Proxy** | Nginx | `8080` | Entry point for services and authentication |
+| **Producer** | Spring Boot | `8083` | Employee Service (REST API + Producer) |
+| **Consumer** | Spring Boot | `8082` | Employee Consumer Service (Persistence) |
+
+### ELK Stack (Full Version Only)
+| Service | Technology | Port | Purpose |
+| :--- | :--- | :--- | :--- |
+| **Search Engine**| Elasticsearch| `9200` | Log indexing and storage |
+| **Visualizer** | Kibana | `5601` | Log analysis and dashboarding |
+| **Log Shipper** | Logstash | `5044` | Log collection and processing |
 
 ---
 
@@ -33,21 +45,31 @@ The configuration relies on the [.env](.env) file. You can modify versions and c
 
 ## Getting Started
 
-### Start Infrastructure
-Run the following command to start all dependencies in the background:
+### Start Standard Infrastructure
+Run the following command to start core dependencies and microservices:
 ```bash
-docker compose up -d
+docker compose -f keycloak-compose.yml up -d
+```
+
+### Start Full Infrastructure (with ELK)
+Run the following command to start everything including the logging stack:
+```bash
+docker compose -f keycloak-compose-full.yml up -d
 ```
 
 ### Stop Infrastructure
 To stop and remove all containers:
 ```bash
-docker compose down
+# Standard
+docker compose -f keycloak-compose.yml down
+
+# Full
+docker compose -f keycloak-compose-full.yml down
 ```
 
 ### View Logs
 ```bash
-docker compose logs -f [service_name]
+docker compose -f [file-name].yml logs -f [service_name]
 ```
 
 ---
@@ -108,4 +130,18 @@ The Nginx proxy (listening on port `8080`) provides the following routes:
 - `/service/` -> Proxies to Employee Service (`8083`)
 - `/consumer/` -> Proxies to Employee Service Consumer (`8082`)
 
-*Note: Ensure the backend services are running on your host machine to be reachable by the proxy. Access them via `http://localstack.lks.com:8080/[path]`.*
+*Note: Access them via `http://localstack.lks.com:8080/[path]`.*
+
+---
+
+## ELK Stack Details
+
+When running the **Full** configuration, you can access the ELK stack at the following URLs:
+
+- **Elasticsearch**: [http://localstack.lks.com:9200](http://localstack.lks.com:9200)
+- **Kibana**: [http://localstack.lks.com:5601/app/home#/](http://localstack.lks.com:5601)
+- **Logstash**: `http://localstack.lks.com:5044` (TCP Input)
+
+Logstash is configured to receive logs via TCP and index them into Elasticsearch. Kibana can be used to visualize these logs by creating an index pattern (e.g., `logs-*`).
+
+

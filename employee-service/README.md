@@ -34,6 +34,12 @@ docker compose -f docker/keycloak-compose.yml up -d employee-service
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
+#### 3. IDE Run Mode
+- Go to Run → Edit Configurations
+- Add Spring Boot configuration for `com.employee.EmployeeServiceApplication`
+- Set VM options: `-Dspring.profiles.active=docker`
+- Add environment variables (optional)
+
 ## Useful Endpoints
 - **Health Check**: `http://localhost:8083/actuator/health`
 - **Swagger UI**: `http://localhost:8083/swagger-ui/index.html`

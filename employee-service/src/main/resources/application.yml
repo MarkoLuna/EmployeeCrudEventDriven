@@ -11,6 +11,8 @@ logging:
 
 ####### resource server configuration properties
 spring:
+  application:
+    name: employee-service
   threads:
     virtual:
       enabled: true
