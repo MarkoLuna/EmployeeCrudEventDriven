@@ -1,13 +1,17 @@
 meta {
-  name: GetEmployee
+  name: ListEmployees
   type: http
-  seq: 2
+  seq: 1
 }
 
 get {
-  url: http://localhost:8082/employees/6952bf406c5e3f0a1b75d04e
+  url: http://localhost:8082/employees/0/10
   body: none
   auth: bearer
+}
+
+headers {
+  ~Authorization: {{auth_type}} {{auth_token}}
 }
 
 auth:bearer {

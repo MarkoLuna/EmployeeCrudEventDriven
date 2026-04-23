@@ -1,0 +1,16 @@
+meta {
+  name: auth health
+  type: http
+  seq: 9
+}
+
+get {
+  url: http://localstack.lks.com:9000/health/ready
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

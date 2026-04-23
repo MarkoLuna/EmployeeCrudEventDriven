@@ -1,11 +1,11 @@
 meta {
-  name: CreateEmployee
+  name: UpdateEmployee
   type: http
-  seq: 3
+  seq: 7
 }
 
-post {
-  url: http://localhost:8082/employees
+put {
+  url: http://localstack.lks.com:8080/service/employees/e26b200a-a8d0-11e9-a2a3-2a2ae2dbcce4
   body: json
   auth: bearer
 }

@@ -1,11 +1,11 @@
 meta {
   name: CreateEmployee
   type: http
-  seq: 4
+  seq: 2
 }
 
 post {
-  url: http://localhost:8083/employees
+  url: http://localhost:8082/employees
   body: json
   auth: bearer
 }
@@ -20,7 +20,7 @@ auth:bearer {
 
 body:json {
   {
-    "firstName": "Mark 9",
+    "firstName": "Mark",
     "middleInitial": "L",
     "lastName": "Luna",
     "dateOfBirth": "17-09-2012",

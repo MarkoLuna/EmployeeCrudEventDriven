@@ -1,7 +1,7 @@
 meta {
   name: UpdateEmployee
   type: http
-  seq: 5
+  seq: 6
 }
 
 put {
@@ -20,14 +20,15 @@ auth:bearer {
 
 body:json {
   {
-  	"firstName": "Mark",
-  	"middleInitial": "L",
-  	"lastName": "Luna",
-  	"dateOfBirth": "17-09-2012",
-  	"dateOfEmployment": "17-09-2014"
+    "firstName": "Mark",
+    "middleInitial": "L",
+    "lastName": "Luna",
+    "dateOfBirth": "17-09-2012",
+    "dateOfEmployment": "17-09-2014"
   }
 }
 
 settings {
   encodeUrl: true
+  timeout: 0
 }

@@ -1,0 +1,16 @@
+meta {
+  name: service health
+  type: http
+  seq: 10
+}
+
+get {
+  url: http://localstack.lks.com:8080/service/actuator/health
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

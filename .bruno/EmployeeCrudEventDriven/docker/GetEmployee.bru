@@ -1,11 +1,11 @@
 meta {
-  name: DeleteEmployee
+  name: GetEmployee
   type: http
-  seq: 5
+  seq: 7
 }
 
-delete {
-  url: localhost:8083/employees/1d5cf451-ffcd-403a-a8c0-8338d0ce381d
+get {
+  url: http://localstack.lks.com:8080/service/employees/6952bf406c5e3f0a1b75d04e
   body: none
   auth: bearer
 }

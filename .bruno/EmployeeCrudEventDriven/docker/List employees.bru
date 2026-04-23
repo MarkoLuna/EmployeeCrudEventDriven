@@ -1,0 +1,20 @@
+meta {
+  name: List employees
+  type: http
+  seq: 4
+}
+
+get {
+  url: http://localstack.lks.com:8080/service/employees/0/10
+  body: none
+  auth: inherit
+}
+
+headers {
+  authorization: {{auth_type}} {{auth_token}}
+}
+
+settings {
+  encodeUrl: false
+  timeout: 0
+}

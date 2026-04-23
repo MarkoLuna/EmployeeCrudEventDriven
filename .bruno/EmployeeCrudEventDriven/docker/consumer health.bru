@@ -1,11 +1,11 @@
 meta {
-  name: health
+  name: consumer health
   type: http
-  seq: 8
+  seq: 9
 }
 
 get {
-  url: http://localhost:8083/actuator/health
+  url: http://localstack.lks.com:8080/consumer/actuator/health
   body: none
   auth: inherit
 }

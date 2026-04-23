@@ -1,24 +1,25 @@
 meta {
-  name: GetToken
+  name: auth dev
   type: http
-  seq: 6
+  seq: 3
 }
 
 post {
-  url: http://localhost:8081/realms/master/protocol/openid-connect/token
+  url: http://localstack.lks.com:8080/auth/realms/dev/protocol/openid-connect/token
   body: formUrlEncoded
   auth: inherit
 }
 
 headers {
-  Host: keycloak-x:8080
+  content-type: application/x-www-form-urlencoded
+  Host: localstack.lks.com:8080
 }
 
 body:form-urlencoded {
-  client_id: master-client
-  client_secret: z6vxpf3uzvJLlsErs9oufAyolCYFvEos
-  username: marcosluna
-  password: marco94
+  client_id: newClient
+  client_secret: newClientSecret
+  username: john@test.com
+  password: 123
   grant_type: password
 }
 
@@ -30,9 +31,9 @@ script:post-response {
   if (jsonData["token_type"] != null) {
       bru.setEnvVar("auth_type", jsonData["token_type"]);
   }
-  
 }
 
 settings {
-  encodeUrl: true
+  encodeUrl: false
+  timeout: 0
 }
