@@ -1,4 +1,4 @@
-FROM amazoncorretto:17-al2022-jdk
+FROM amazoncorretto:21.0.10-alpine3.21
 EXPOSE 8080
 
 COPY target/EmployeeServiceConsumer.jar /app.jar
