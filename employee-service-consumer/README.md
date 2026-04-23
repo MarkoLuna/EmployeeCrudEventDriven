@@ -1,29 +1,60 @@
-# Employee Crud
-Employee Crud using oauth2, web, lombok, H2 DB and others.
+# Employee Service Consumer
 
-## Instructions
-- Run EmployeeCrudApplication class
-- Import "EmployeeCrud.postman_collection.json" file into postman tool
-- Run any request on Postman tool (make sure that any environment is selected and run Login request before this)
-- Swagger url http://localhost:8080/swagger-ui/index.html
+The **Employee Service Consumer** is a critical component of the event-driven Employee Management System. It is responsible for processing asynchronous events from Kafka and ensuring data persistence.
 
-## Prerequisites
-- Open JDK 17
+## Roles & Responsibilities
+- **Event Consumption**: Listens to `employee-upsert.v1` and `employee-deletion.v1` topics.
+- **Data Persistence**: Manages employee records in **MongoDB**.
+- **Internal API**: Exposes read-only REST endpoints used by the *Employee Service (Producer)* to fetch data for GET and LIST requests.
+- **OAuth2 Security**: Acts as a Resource Server, validating JWT tokens issued by Keycloak.
 
-You can install any version, i.e. [Amazon Corretto](https://docs.aws.amazon.com/corretto/latest/corretto-17-ug/downloads-list.html).
+## Technology Stack
+- **Framework**: Spring Boot 3.4.4
+- **Persistence**: Spring Data MongoDB
+- **Messaging**: Spring Kafka
+- **Security**: Spring Security OAuth2 Resource Server
+- **Documentation**: Swagger UI (OpenAPI)
 
-- Maven
+## Getting Started
 
-You can use the embedded Maven binaries that your IDE offers, or you can install your own one.
+### Prerequisites
+Ensure the infrastructure (Kafka, MongoDB, Keycloak) is running. Refer to the [Root README](../README.md) for full setup instructions.
 
-## Update versions
+### Running the Application
+You can run the consumer in two modes:
+
+#### 1. Docker Mode (Recommended)
+This is the default mode when running the entire system via Docker Compose.
+```bash
+# From the root directory
+docker compose -f docker/keycloak-compose.yml up -d employee-service-consumer
 ```
-mvn versions:display-property-updates 
+
+#### 2. Local Development Mode
+Use this mode if you want to run the consumer from your IDE or terminal against the Docker infrastructure.
+```bash
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
-### Spotless
-```
+## Kafka Topics
+| Topic Name | Purpose |
+| :--- | :--- |
+| `employee-upsert.v1` | Receives employee creation and update events. |
+| `employee-deletion.v1` | Receives employee deletion events. |
+
+## Useful Endpoints
+- **Health Check**: `http://localhost:8082/actuator/health`
+- **Swagger UI**: `http://localhost:8082/swagger-ui/index.html`
+- **Internal API**: `http://localhost:8082/internal/employees` (Requires valid JWT)
+
+## Code Quality
+### Spotless (Formatting)
+```bash
 mvn spotless:check
 mvn spotless:apply
 ```
 
+### Version Updates
+```bash
+mvn versions:display-property-updates 
+```
