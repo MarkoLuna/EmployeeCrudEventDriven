@@ -3,7 +3,6 @@ package com.employee.config;
 import com.employee.clients.EmployeeClient;
 import com.employee.config.feign.AuthorizationInterceptor;
 import com.employee.config.feign.MessageErrorDecoder;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -26,7 +25,6 @@ public class FeignClientsConfig {
     return new ObjectMapper()
         .registerModule(new JavaTimeModule())
         .registerModule(new Jdk8Module())
-        .setSerializationInclusion(JsonInclude.Include.NON_NULL)
         .configure(SerializationFeature.INDENT_OUTPUT, true)
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
   }
@@ -38,8 +36,7 @@ public class FeignClientsConfig {
 
   @Bean
   public EmployeeClient employeeClient(
-      @Value("${services.employee-service-consumer.base-url}")
-          String employeeServiceConsumerBaseUrl,
+      @Value("${services.employee-service-consumer.base-url}") String employeeServiceConsumerBaseUrl,
       ObjectMapper feignObjectMapper,
       ErrorDecoder errorDecoder) {
     return Feign.builder()
