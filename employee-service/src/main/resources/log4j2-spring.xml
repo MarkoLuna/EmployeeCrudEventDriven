@@ -11,10 +11,10 @@
     </Appenders>
     <Loggers>
         <Root level="info">
-            <SpringProfile name="docker">
+            <SpringProfile name="elk">
                 <AppenderRef ref="Logstash"/>
             </SpringProfile>
-            <SpringProfile name="!docker">
+            <SpringProfile name="!elk">
                 <AppenderRef ref="Console"/>
             </SpringProfile>
         </Root>
