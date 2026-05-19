@@ -6,7 +6,6 @@ import com.common.employee.exceptions.EmployeeNotFound;
 import com.employee.clients.EmployeeClient;
 import com.employee.mappers.EmployeeMapper;
 import java.util.Optional;
-import java.util.concurrent.Executor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -23,7 +22,6 @@ public class EmployeeService {
   private final KafkaTemplate<String, EmployeeMessage> employeeUpsertKafkaTemplate;
   private final EmployeeClient employeeClient;
   private final EmployeeMapper employeeMapper;
-  private final Executor customTaskExecutor;
 
   public EmployeePage list(Integer page, Integer sizePage) {
     return employeeClient.listEmployees(page, sizePage);
@@ -41,20 +39,23 @@ public class EmployeeService {
             .operationType(EmployeeOperationType.CREATE)
             .build();
     Message<EmployeeMessage> message = MessageBuilder.withPayload(employeeMessage).build();
+
     employeeUpsertKafkaTemplate
         .send(message)
-            .whenComplete((result, ex) -> {
+        .whenCompleteAsync(
+            (result, ex) -> {
               if (ex == null) {
-                log.debug("employee created successfully. [topic: {}], [partition: {}], [offset: {}], [value: {}]",
-                        result.getRecordMetadata().topic(),
-                        result.getRecordMetadata().partition(),
-                        result.getRecordMetadata().offset(),
-                        result.getProducerRecord().value());
+                log.debug(
+                    "employee created successfully. [topic: {}], [partition: {}], [offset: {}], [value: {}]",
+                    result.getRecordMetadata().topic(),
+                    result.getRecordMetadata().partition(),
+                    result.getRecordMetadata().offset(),
+                    result.getProducerRecord().value());
               } else {
                 log.warn("Failed to send employee record to kafka", ex);
               }
             });
-    return Optional.of(employeeMapper.convert(req));
+    return Optional.ofNullable(employeeMapper.convert(req));
   }
 
   public EmployeeDto updateEmployee(String employeeId, EmployeeDto empl) {
@@ -65,7 +66,22 @@ public class EmployeeService {
             .operationType(EmployeeOperationType.UPDATE)
             .build();
     Message<EmployeeMessage> message = MessageBuilder.withPayload(employeeMessage).build();
-    employeeUpsertKafkaTemplate.send(message);
+    
+    employeeUpsertKafkaTemplate
+        .send(message)
+        .whenCompleteAsync(
+            (result, ex) -> {
+              if (ex == null) {
+                log.debug(
+                    "employee updated successfully. [topic: {}], [partition: {}], [offset: {}], [value: {}]",
+                    result.getRecordMetadata().topic(),
+                    result.getRecordMetadata().partition(),
+                    result.getRecordMetadata().offset(),
+                    result.getProducerRecord().value());
+              } else {
+                log.warn("Failed to send employee record to kafka", ex);
+              }
+            });
     return empl;
   }
 
@@ -76,6 +92,21 @@ public class EmployeeService {
             .operationType(EmployeeOperationType.DELETE)
             .build();
     Message<EmployeeMessage> message = MessageBuilder.withPayload(employeeMessage).build();
-    employeeDeletionKafkaTemplate.send(message);
+
+    employeeDeletionKafkaTemplate
+        .send(message)
+        .whenCompleteAsync(
+            (result, ex) -> {
+              if (ex == null) {
+                log.debug(
+                    "employee deleted successfully. [topic: {}], [partition: {}], [offset: {}], [value: {}]",
+                    result.getRecordMetadata().topic(),
+                    result.getRecordMetadata().partition(),
+                    result.getRecordMetadata().offset(),
+                    result.getProducerRecord().value());
+              } else {
+                log.warn("Failed to send employee record to kafka", ex);
+              }
+            });
   }
 }

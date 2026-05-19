@@ -82,12 +82,12 @@ public class KafkaConsumer {
       log.info(
           "Getting the ms365 event again. delivery attempt: [{}] the employeeId: [{}]",
           () -> deliveryAttempt,
-          () -> message.employeeId());
+              message::employeeId);
       if (employeeService.employeeMatch(message.employeeId(), message.employee())) {
         log.info(
             "Record Already found, wont process.. delivery attempt: [{}] the employeeId: [{}]",
             () -> deliveryAttempt,
-            () -> message.employeeId());
+                message::employeeId);
         return true;
       }
     }

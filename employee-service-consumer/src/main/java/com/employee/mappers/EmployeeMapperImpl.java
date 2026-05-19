@@ -7,14 +7,15 @@ import com.employee.entities.Employee;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * implementation for mapper class between {@link EmployeeDto}, {@link Employee} and {@link
  * EmployeeInfo}.
  */
 @Service
+@Validated
 public class EmployeeMapperImpl implements EmployeeMapper {
 
   /** {@inheritDoc} */

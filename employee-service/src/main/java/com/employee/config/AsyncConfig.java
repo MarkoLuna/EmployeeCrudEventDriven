@@ -10,13 +10,13 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @EnableAsync
 public class AsyncConfig {
 
-  @Bean(name = "customTaskExecutor")
+  @Bean(name = "employeeProducerTaskExecutor")
   public Executor taskExecutor() {
     ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
     executor.setCorePoolSize(5);
     executor.setMaxPoolSize(10);
     executor.setQueueCapacity(25);
-    executor.setThreadNamePrefix("CustomExecutor-");
+    executor.setThreadNamePrefix("EmployeeProducer-");
     executor.initialize();
     return executor;
   }
