@@ -59,8 +59,7 @@ class EmployeeServiceTest {
             employeeDeletionKafkaTemplate,
             employeeUpsertKafkaTemplate,
             employeeClient,
-            employeeMapper,
-            Executors.newSingleThreadExecutor());
+            employeeMapper);
   }
 
   @DisplayName("List all employees")
@@ -150,6 +149,9 @@ class EmployeeServiceTest {
             .dateOfBirth(BASIC_DATE)
             .dateOfEmployment(BASIC_DATE)
             .build();
+    
+    when(employeeUpsertKafkaTemplate.send(any(Message.class)))
+            .thenReturn(CompletableFuture.completedFuture(new SendResult(null, null)));
 
     assertThat(employeeService.updateEmployee(id, req)).isNotNull().isEqualTo(req);
     verify(employeeUpsertKafkaTemplate).send(employeeMessageCaptor.capture());
@@ -177,6 +179,10 @@ class EmployeeServiceTest {
   @Test
   void deleteEmployee() {
     var id = "e26b1d76-a8d0-11e9-a2a3-2a2ae2dbcce4";
+    
+    when(employeeDeletionKafkaTemplate.send(any(Message.class)))
+            .thenReturn(CompletableFuture.completedFuture(new SendResult(null, null)));
+
     assertThatCode(() -> employeeService.deleteEmployee(id)).doesNotThrowAnyException();
 
     verify(employeeDeletionKafkaTemplate).send(employeeMessageCaptor.capture());

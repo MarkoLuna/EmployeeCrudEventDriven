@@ -20,16 +20,19 @@ class EmployeeMapperTest {
   @Test
   @DisplayName("Verify the mapping from EmployeeRequest to EmployeeDto")
   void whenMapFromEmployeeRequest_WithValidObjectToMap_ThenAllFieldsAreCorrectlyMapped() {
-    var expected = buildEmployeeDto();
     var employee = buildEmployeeInfo();
 
     var employeeDto = employeeMapper.convert(employee);
 
     assertThat(employeeDto)
-        .isNotNull()
-        .usingRecursiveComparison()
-        .ignoringFields("id")
-        .isEqualTo(expected);
+      .as("Verify the mapping from EmployeeInfo to EmployeeDto")  
+      .isNotNull()
+      .returns("firstName", EmployeeDto::firstName)
+      .returns("middleInitial", EmployeeDto::middleInitial)
+      .returns("lastName", EmployeeDto::lastName)
+      .returns(LocalDate.of(2012, 9, 17), EmployeeDto::dateOfBirth)
+      .returns(LocalDate.of(2014, 9, 17), EmployeeDto::dateOfEmployment)
+      .returns(EmployeeStatus.ACTIVE, EmployeeDto::status);
   }
 
   private EmployeeInfo buildEmployeeInfo() {
@@ -41,16 +44,5 @@ class EmployeeMapperTest {
             .dateOfEmployment(LocalDate.of(2014, 9, 17))
             .status(EmployeeStatus.ACTIVE)
             .build();
-  }
-
-  private EmployeeDto buildEmployeeDto() {
-    return new EmployeeDto(
-        "fee120ce-6b40-47c1-a24e-e1e3cf50e6b0",
-        "firstName",
-        "middleInitial",
-        "lastName",
-        LocalDate.of(2012, 9, 17),
-        LocalDate.of(2014, 9, 17),
-        EmployeeStatus.ACTIVE);
   }
 }
