@@ -1,0 +1,45 @@
+meta {
+  name: UpdateUser
+  type: http
+  seq: 5
+}
+
+put {
+  url: http://localhost:8084/users/{{userId}}
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+body:json {
+  {
+    "firstName": "Johnny",
+    "lastName": "Smith",
+    "email": "johnny.smith@example.com",
+    "enabled": true,
+    "emailVerified": true,
+    "credentials": [
+      {
+        "type": "password",
+        "value": "newPassword123",
+        "temporary": false
+      }
+    ]
+  }
+}
+
+vars:pre-request {
+  userId: 481f1e3f-7c90-48fa-a9fd-1167a0f92865
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

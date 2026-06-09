@@ -1,11 +1,11 @@
 meta {
-  name: GetToken
+  name: GetToken Mike
   type: http
   seq: 2
 }
 
 post {
-  url: http://localhost:8081/realms/master/protocol/openid-connect/token
+  url: http://localhost:8081/realms/dev/protocol/openid-connect/token
   body: formUrlEncoded
   auth: inherit
 }
@@ -15,10 +15,10 @@ headers {
 }
 
 body:form-urlencoded {
-  client_id: master-client
-  client_secret: z6vxpf3uzvJLlsErs9oufAyolCYFvEos
-  username: marcosluna
-  password: marco94
+  client_id: newClient
+  client_secret: newClientSecret
+  username: mike@other.com
+  password: pass
   grant_type: password
 }
 

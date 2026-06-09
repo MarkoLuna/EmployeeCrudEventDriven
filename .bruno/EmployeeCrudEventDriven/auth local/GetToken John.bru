@@ -1,5 +1,5 @@
 meta {
-  name: GetToken User 2
+  name: GetToken John
   type: http
   seq: 5
 }
@@ -20,6 +20,7 @@ body:form-urlencoded {
   username: john@test.com
   password: 123
   grant_type: password
+  scope: openid profile roles
 }
 
 script:post-response {

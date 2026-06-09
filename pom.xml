@@ -11,6 +11,7 @@
         <module>employee-api</module>
         <module>employee-service</module>
         <module>employee-service-consumer</module>
+        <module>users-service</module>
     </modules>
 
     <groupId>com.employeecrud</groupId>

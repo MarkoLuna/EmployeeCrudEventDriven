@@ -1,0 +1,28 @@
+meta {
+  name: GetUserById
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:8084/users/{{userId}}
+  body: none
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+vars:pre-request {
+  userId: a5461470-33eb-4b2d-82d4-b0484e96ad7f
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

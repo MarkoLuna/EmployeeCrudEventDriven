@@ -1,0 +1,28 @@
+meta {
+  name: DeleteUser
+  type: http
+  seq: 6
+}
+
+delete {
+  url: http://localhost:8084/users/{{userId}}
+  body: none
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+vars:pre-request {
+  userId: 481f1e3f-7c90-48fa-a9fd-1167a0f92865
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

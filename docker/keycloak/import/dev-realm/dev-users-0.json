@@ -18,6 +18,7 @@
     "requiredActions" : [ ],
     "realmRoles" : [ "offline_access", "uma_authorization" ],
     "clientRoles" : {
+      "realm-management" : [ "manage-users", "view-users", "query-users" ],
       "account" : [ "manage-account", "view-profile" ]
     },
     "notBefore" : 0,
