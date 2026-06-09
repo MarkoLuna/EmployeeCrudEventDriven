@@ -11,6 +11,6 @@ public interface EmployeeClient {
   @RequestLine("GET /employees/{id}")
   Optional<EmployeeDto> getEmployee(@Param("id") String id);
 
-  @RequestLine("GET /employees/{page}/{size}")
+  @RequestLine("GET /employees/list/{page}/{size}")
   EmployeePage listEmployees(@Param("page") Integer page, @Param("size") Integer size);
 }

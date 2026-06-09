@@ -36,7 +36,8 @@ public class FeignClientsConfig {
 
   @Bean
   public EmployeeClient employeeClient(
-      @Value("${services.employee-service-consumer.base-url}") String employeeServiceConsumerBaseUrl,
+      @Value("${services.employee-service-consumer.base-url}")
+          String employeeServiceConsumerBaseUrl,
       ObjectMapper feignObjectMapper,
       ErrorDecoder errorDecoder) {
     return Feign.builder()

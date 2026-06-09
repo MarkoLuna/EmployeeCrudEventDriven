@@ -108,7 +108,8 @@ public class EmployeeControllerTest {
   @DisplayName("Create a new employee")
   @Test
   void createEmployee() throws Exception {
-    var request = new EmployeeInfo("Gerardo2", "J", "Luna", BASIC_DATE, BASIC_DATE, EmployeeStatus.ACTIVE);
+    var request =
+        new EmployeeInfo("Gerardo2", "J", "Luna", BASIC_DATE, BASIC_DATE, EmployeeStatus.ACTIVE);
     var responseDto = EmployeeDto.builder().firstName("Gerardo2").build();
     when(employeeService.createEmployee(request)).thenReturn(Optional.of(responseDto));
 

@@ -78,7 +78,7 @@ public class EmployeeController {
       @Parameter(description = "Employee information for a new employee to be created.")
           @Valid
           @RequestBody
-            EmployeeInfo request) {
+          EmployeeInfo request) {
 
     return employeeService
         .createEmployee(request)

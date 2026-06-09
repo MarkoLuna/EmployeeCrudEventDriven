@@ -67,7 +67,7 @@ class EmployeeControllerTest {
         .thenReturn(EmployeePage.builder().content(employees).pageSize(employees.size()).build());
 
     mockMvc
-        .perform(get("/employees/{page}/{total}", 0, 10).accept(MediaType.APPLICATION_JSON))
+        .perform(get("/employees/list/{page}/{total}", 0, 10).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.content[*].id").isNotEmpty());
   }
@@ -101,7 +101,8 @@ class EmployeeControllerTest {
   @Test
   void createEmployee() throws Exception {
 
-    var request = new EmployeeInfo("Gerardo2", "J", "Luna", BASIC_DATE, BASIC_DATE, EmployeeStatus.ACTIVE);
+    var request =
+        new EmployeeInfo("Gerardo2", "J", "Luna", BASIC_DATE, BASIC_DATE, EmployeeStatus.ACTIVE);
     var employeeDto =
         EmployeeDto.builder()
             .id("id")
@@ -150,13 +151,13 @@ class EmployeeControllerTest {
             .build();
 
     var employeeDto =
-            EmployeeDto.builder()
-                    .firstName("Gerardo")
-                    .middleInitial("J")
-                    .lastName("Luna")
-                    .dateOfBirth(BASIC_DATE)
-                    .dateOfEmployment(BASIC_DATE)
-                    .build();
+        EmployeeDto.builder()
+            .firstName("Gerardo")
+            .middleInitial("J")
+            .lastName("Luna")
+            .dateOfBirth(BASIC_DATE)
+            .dateOfEmployment(BASIC_DATE)
+            .build();
 
     when(employeeService.updateEmployee(id, employeeInfo))
         .thenAnswer(invocationOnMock -> employeeDto);

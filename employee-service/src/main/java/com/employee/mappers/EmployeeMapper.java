@@ -7,7 +7,6 @@ import jakarta.validation.constraints.NotNull;
 /** Mapper class between {@link EmployeeDto}, {@link EmployeeDto} and {@link EmployeeInfo}. */
 public interface EmployeeMapper {
 
-
   /**
    * Converts {@link EmployeeInfo} to {@link EmployeeDto}.
    *

@@ -25,24 +25,24 @@ class EmployeeMapperTest {
     var employeeDto = employeeMapper.convert(employee);
 
     assertThat(employeeDto)
-      .as("Verify the mapping from EmployeeInfo to EmployeeDto")  
-      .isNotNull()
-      .returns("firstName", EmployeeDto::firstName)
-      .returns("middleInitial", EmployeeDto::middleInitial)
-      .returns("lastName", EmployeeDto::lastName)
-      .returns(LocalDate.of(2012, 9, 17), EmployeeDto::dateOfBirth)
-      .returns(LocalDate.of(2014, 9, 17), EmployeeDto::dateOfEmployment)
-      .returns(EmployeeStatus.ACTIVE, EmployeeDto::status);
+        .as("Verify the mapping from EmployeeInfo to EmployeeDto")
+        .isNotNull()
+        .returns("firstName", EmployeeDto::firstName)
+        .returns("middleInitial", EmployeeDto::middleInitial)
+        .returns("lastName", EmployeeDto::lastName)
+        .returns(LocalDate.of(2012, 9, 17), EmployeeDto::dateOfBirth)
+        .returns(LocalDate.of(2014, 9, 17), EmployeeDto::dateOfEmployment)
+        .returns(EmployeeStatus.ACTIVE, EmployeeDto::status);
   }
 
   private EmployeeInfo buildEmployeeInfo() {
     return EmployeeInfo.builder()
-            .firstName("firstName")
-            .lastName("lastName")
-            .middleInitial("middleInitial")
-            .dateOfBirth(LocalDate.of(2012, 9, 17))
-            .dateOfEmployment(LocalDate.of(2014, 9, 17))
-            .status(EmployeeStatus.ACTIVE)
-            .build();
+        .firstName("firstName")
+        .lastName("lastName")
+        .middleInitial("middleInitial")
+        .dateOfBirth(LocalDate.of(2012, 9, 17))
+        .dateOfEmployment(LocalDate.of(2014, 9, 17))
+        .status(EmployeeStatus.ACTIVE)
+        .build();
   }
 }

@@ -84,7 +84,8 @@ class EmployeeServiceTest {
   @DisplayName("Create a new employee")
   @Test
   void createEmployee() {
-    var request = new EmployeeInfo("Gerardo2", "J", "Luna", BASIC_DATE, BASIC_DATE, EmployeeStatus.ACTIVE);
+    var request =
+        new EmployeeInfo("Gerardo2", "J", "Luna", BASIC_DATE, BASIC_DATE, EmployeeStatus.ACTIVE);
     var expected =
         EmployeeDto.builder()
             .firstName("Gerardo2")
@@ -116,13 +117,13 @@ class EmployeeServiceTest {
         .thenReturn(Optional.of(createEmployeeEntity(id)));
     assertThat(employeeService.updateEmployee(id, req))
         .isNotNull()
-            .returns(id, EmployeeDto::id)
-            .returns(req.firstName(), EmployeeDto::firstName)
-            .returns(req.lastName(), EmployeeDto::lastName)
-            .returns(req.middleInitial(), EmployeeDto::middleInitial)
-            .returns(req.status(), EmployeeDto::status)
-            .returns(req.dateOfBirth(), EmployeeDto::dateOfBirth)
-            .returns(req.dateOfEmployment(), EmployeeDto::dateOfEmployment);
+        .returns(id, EmployeeDto::id)
+        .returns(req.firstName(), EmployeeDto::firstName)
+        .returns(req.lastName(), EmployeeDto::lastName)
+        .returns(req.middleInitial(), EmployeeDto::middleInitial)
+        .returns(req.status(), EmployeeDto::status)
+        .returns(req.dateOfBirth(), EmployeeDto::dateOfBirth)
+        .returns(req.dateOfEmployment(), EmployeeDto::dateOfEmployment);
     verify(employeeRepository).save(employeeCaptor.capture());
 
     assertThat(employeeCaptor.getValue())

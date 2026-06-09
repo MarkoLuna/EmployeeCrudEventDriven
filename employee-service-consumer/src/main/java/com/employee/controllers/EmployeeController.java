@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController(value = "/employees")
+@RestController
 @Tag(
     name = "Employees",
     description = "Set of endpoints for Creating, Retrieving, Updating and Deleting of Employees.")
@@ -31,7 +31,7 @@ public class EmployeeController {
 
   @Autowired private EmployeeService employeeService;
 
-  @GetMapping("/{page}/{size}")
+  @GetMapping("/employees/list/{page}/{size}")
   @ResponseStatus(HttpStatus.OK)
   @Operation(summary = "Returns list of all Employees in the system.")
   @SecurityRequirement(name = "Bearer Authentication")
@@ -51,7 +51,7 @@ public class EmployeeController {
     return employeeService.list(page, pageSize);
   }
 
-  @GetMapping("/{id}")
+  @GetMapping("/employees/{id}")
   @ResponseStatus(HttpStatus.OK)
   @Operation(summary = "Returns a specific employee by their identifier. 404 if does not exist.")
   @SecurityRequirement(name = "Bearer Authentication")
@@ -66,7 +66,7 @@ public class EmployeeController {
     return employeeService.getEmployee(employeeId);
   }
 
-  @PostMapping()
+  @PostMapping("/employees")
   @ResponseStatus(HttpStatus.OK)
   @Operation(summary = "Creates a new employee.")
   @SecurityRequirement(name = "Bearer Authentication")
@@ -74,14 +74,14 @@ public class EmployeeController {
       @Parameter(description = "Employee information for a new employee to be created.")
           @Valid
           @RequestBody
-      EmployeeInfo request) {
+          EmployeeInfo request) {
 
     return employeeService
         .createEmployee(request)
         .orElseThrow(() -> new InvalidDataException("Employee already exists .."));
   }
 
-  @PutMapping(value = "/{id}")
+  @PutMapping(value = "/employees/{id}")
   @ResponseStatus(HttpStatus.OK)
   @SecurityRequirement(name = "Bearer Authentication")
   public EmployeeDto updateEmployee(
@@ -90,7 +90,7 @@ public class EmployeeController {
     return employeeService.updateEmployee(employeeId, request);
   }
 
-  @DeleteMapping("/{id}")
+  @DeleteMapping("/employees/{id}")
   @ResponseStatus(HttpStatus.OK)
   @Operation(
       summary =

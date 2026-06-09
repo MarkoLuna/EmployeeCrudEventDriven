@@ -115,7 +115,13 @@ public class EmployeeServiceConsumerTest {
                 .with(jwt())
                 .content(
                     asJsonString(
-                        new EmployeeInfo("Gerardo2", "J", "Luna", BASIC_DATE, BASIC_DATE, EmployeeStatus.ACTIVE)))
+                        new EmployeeInfo(
+                            "Gerardo2",
+                            "J",
+                            "Luna",
+                            BASIC_DATE,
+                            BASIC_DATE,
+                            EmployeeStatus.ACTIVE)))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
@@ -148,7 +154,8 @@ public class EmployeeServiceConsumerTest {
                 .with(jwt())
                 .content(
                     asJsonString(
-                        new EmployeeInfo("Gerardo", "J", "Luna", BASIC_DATE, BASIC_DATE, EmployeeStatus.ACTIVE)))
+                        new EmployeeInfo(
+                            "Gerardo", "J", "Luna", BASIC_DATE, BASIC_DATE, EmployeeStatus.ACTIVE)))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())

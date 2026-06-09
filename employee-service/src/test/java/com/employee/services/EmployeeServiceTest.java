@@ -20,7 +20,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -108,7 +107,8 @@ class EmployeeServiceTest {
   @DisplayName("Create a new employee")
   @Test
   void createEmployee() {
-    var request = new EmployeeInfo("Gerardo2", "J", "Luna", BASIC_DATE, BASIC_DATE, EmployeeStatus.ACTIVE);
+    var request =
+        new EmployeeInfo("Gerardo2", "J", "Luna", BASIC_DATE, BASIC_DATE, EmployeeStatus.ACTIVE);
     var expected =
         EmployeeDto.builder()
             .firstName("Gerardo2")
@@ -119,7 +119,7 @@ class EmployeeServiceTest {
             .status(EmployeeStatus.ACTIVE)
             .build();
     when(employeeUpsertKafkaTemplate.send(any(Message.class)))
-            .thenReturn(CompletableFuture.completedFuture(new SendResult(null, null)));
+        .thenReturn(CompletableFuture.completedFuture(new SendResult(null, null)));
     assertThat(employeeService.createEmployee(request))
         .isNotNull()
         .isEqualTo(Optional.of(expected));
@@ -149,9 +149,9 @@ class EmployeeServiceTest {
             .dateOfBirth(BASIC_DATE)
             .dateOfEmployment(BASIC_DATE)
             .build();
-    
+
     when(employeeUpsertKafkaTemplate.send(any(Message.class)))
-            .thenReturn(CompletableFuture.completedFuture(new SendResult(null, null)));
+        .thenReturn(CompletableFuture.completedFuture(new SendResult(null, null)));
 
     assertThat(employeeService.updateEmployee(id, req)).isNotNull().isEqualTo(req);
     verify(employeeUpsertKafkaTemplate).send(employeeMessageCaptor.capture());
@@ -179,9 +179,9 @@ class EmployeeServiceTest {
   @Test
   void deleteEmployee() {
     var id = "e26b1d76-a8d0-11e9-a2a3-2a2ae2dbcce4";
-    
+
     when(employeeDeletionKafkaTemplate.send(any(Message.class)))
-            .thenReturn(CompletableFuture.completedFuture(new SendResult(null, null)));
+        .thenReturn(CompletableFuture.completedFuture(new SendResult(null, null)));
 
     assertThatCode(() -> employeeService.deleteEmployee(id)).doesNotThrowAnyException();
 
