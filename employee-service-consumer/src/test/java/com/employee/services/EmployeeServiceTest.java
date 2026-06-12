@@ -101,6 +101,7 @@ class EmployeeServiceTest {
             .dateOfEmployment(BASIC_DATE)
             .status(EmployeeStatus.ACTIVE)
             .build();
+
     assertThat(employeeService.createEmployee(request))
         .isNotNull()
         .isEqualTo(Optional.of(expected));

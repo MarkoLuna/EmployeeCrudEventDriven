@@ -8,7 +8,6 @@ import com.common.employee.exceptions.EmployeeNotFound;
 import com.employee.entities.Employee;
 import com.employee.mappers.EmployeeMapper;
 import com.employee.repositories.EmployeeRepository;
-import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -44,16 +43,9 @@ public class EmployeeService {
   }
 
   public Optional<EmployeeDto> createEmployee(EmployeeInfo req) {
-    List<Employee> existanEmployee =
-        employeeRepository.findByFirstNameAndMiddleInitialAndLastNameAndStatus(
-            req.firstName(), req.middleInitial(), req.lastName(), EmployeeStatus.ACTIVE);
-
-    if (!existanEmployee.isEmpty()) return Optional.empty();
-
     Employee employee = employeeMapper.convert(req);
     employeeRepository.save(employee);
-    EmployeeDto employeeDto = employeeMapper.convert(employee);
-    return Optional.of(employeeDto);
+    return Optional.of(employeeMapper.convert(employee));
   }
 
   public EmployeeDto updateEmployee(String id, EmployeeInfo emplReq) throws EmployeeNotFound {
