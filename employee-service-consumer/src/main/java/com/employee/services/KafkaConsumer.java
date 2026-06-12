@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.retrytopic.RetryTopicHeaders;
+import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -22,6 +23,8 @@ public class KafkaConsumer {
 
   private final EmployeeService employeeService;
 
+  private final DeduplicationService deduplicationService;
+
   @KafkaListener(
       topics = "${kafka.consumer.employee-upsert-topic}",
       autoStartup = "${kafka.consumer.enabled:false}",
@@ -29,10 +32,18 @@ public class KafkaConsumer {
   public void listenEmployeeUpsert(
       @Payload EmployeeMessage message,
       @Header(name = RetryTopicHeaders.DEFAULT_HEADER_ATTEMPTS, required = false)
-          Integer nonBlockingAttempts) {
+          Integer nonBlockingAttempts,
+      @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
+      @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,
+      @Header(KafkaHeaders.OFFSET) long offset) {
     var entry = log.traceEntry("listenEmployeeUpsertMessage: {}", message);
     try {
       if (recordAlreadyProcessed(nonBlockingAttempts, message)) {
+        return;
+      }
+      String dedupKey = topic + ":" + partition + ":" + offset;
+      if (deduplicationService.exists(dedupKey)) {
+        log.info("Record already processed, skipping. dedupKey: {}", dedupKey);
         return;
       }
       switch (message.operationType()) {
@@ -41,6 +52,7 @@ public class KafkaConsumer {
         default ->
             log.warn("unable to process record due to the operation type is invalid {}", message);
       }
+      deduplicationService.markProcessed(dedupKey);
       log.traceExit(entry);
     } catch (EmployeeNotFound ex) {
       log.error("Unable to process employee update message", ex);
@@ -58,7 +70,10 @@ public class KafkaConsumer {
   public void listenEmployeeDeletion(
       @Payload EmployeeMessage message,
       @Header(name = RetryTopicHeaders.DEFAULT_HEADER_ATTEMPTS, required = false)
-          Integer nonBlockingAttempts) {
+          Integer nonBlockingAttempts,
+      @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
+      @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,
+      @Header(KafkaHeaders.OFFSET) long offset) {
     var entry = log.traceEntry("listenEmployeeDeletionMessage: {}", message);
     try {
       int deliveryAttempt = isNull(nonBlockingAttempts) ? 0 : nonBlockingAttempts;
@@ -75,7 +90,13 @@ public class KafkaConsumer {
           return;
         }
       }
+      String dedupKey = topic + ":" + partition + ":" + offset;
+      if (deduplicationService.exists(dedupKey)) {
+        log.info("Record already processed, skipping. dedupKey: {}", dedupKey);
+        return;
+      }
       employeeService.deleteEmployee(message.employeeId());
+      deduplicationService.markProcessed(dedupKey);
       log.traceExit(entry);
     } catch (EmployeeNotFound ex) {
       log.error("Unable to process employee deletion message", ex);
@@ -86,10 +107,6 @@ public class KafkaConsumer {
     }
   }
 
-  // FIXME: This only catches non-blocking retry deliveries. A consumer rebalance or
-  // unclean shutdown may cause duplicate deliveries not handled here.
-  // Implement persistent deduplication by storing Kafka message IDs in a MongoDB
-  // collection and checking before processing.
   private boolean recordAlreadyProcessed(Integer nonBlockingAttempts, EmployeeMessage message) {
     int deliveryAttempt = isNull(nonBlockingAttempts) ? 0 : nonBlockingAttempts;
     if (deliveryAttempt > 0) {
