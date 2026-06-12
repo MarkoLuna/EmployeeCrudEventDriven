@@ -1,6 +1,9 @@
 package com.employee.services;
 
-import com.common.employee.dto.*;
+import com.common.employee.dto.EmployeeDto;
+import com.common.employee.dto.EmployeeInfo;
+import com.common.employee.dto.EmployeeMessage;
+import com.common.employee.dto.EmployeePage;
 import com.common.employee.enums.EmployeeOperationType;
 import com.common.employee.exceptions.EmployeeNotFound;
 import com.employee.clients.EmployeeClient;
