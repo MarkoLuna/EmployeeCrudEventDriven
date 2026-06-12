@@ -1,0 +1,29 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "employee-service",
+      "request": "launch",
+      "mainClass": "com.employee.EmployeeServiceApplication",
+      "projectName": "employee-service",
+      "vmArgs": "-Dspring.profiles.active=local"
+    },
+    {
+      "type": "java",
+      "name": "employee-service-consumer",
+      "request": "launch",
+      "mainClass": "com.employee.EmployeeConsumerServiceApplication",
+      "projectName": "employee-service-consumer",
+      "vmArgs": "-Dspring.profiles.active=local"
+    },
+    {
+      "type": "java",
+      "name": "users-service",
+      "request": "launch",
+      "mainClass": "com.users.UsersServiceApplication",
+      "projectName": "users-service",
+      "vmArgs": "-Dspring.profiles.active=local"
+    }
+  ]
+}
