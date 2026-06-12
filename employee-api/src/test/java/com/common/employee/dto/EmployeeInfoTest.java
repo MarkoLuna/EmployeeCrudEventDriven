@@ -9,6 +9,7 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import java.time.LocalDate;
 import java.util.Set;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -16,11 +17,18 @@ class EmployeeInfoTest {
 
   private static final LocalDate BASIC_DATE = LocalDate.of(2012, 9, 17);
   private static Validator validator;
+  private static ValidatorFactory factory;
 
   @BeforeAll
   static void setUpValidator() {
-    try (ValidatorFactory factory = buildDefaultValidatorFactory()) {
-      validator = factory.getValidator();
+    factory = buildDefaultValidatorFactory();
+    validator = factory.getValidator();
+  }
+
+  @AfterAll
+  static void closeValidator() {
+    if (factory != null) {
+      factory.close();
     }
   }
 
@@ -64,18 +72,15 @@ class EmployeeInfoTest {
   }
 
   @Test
-  void employeeMiddleInitialIsEmpty() {
+  void employeeMiddleInitialIsOptional() {
     EmployeeInfo employeeInfo =
         new EmployeeInfo("Marcos", "", "Luna", BASIC_DATE, BASIC_DATE, EmployeeStatus.ACTIVE);
 
     Set<ConstraintViolation<EmployeeInfo>> constraintViolations = validator.validate(employeeInfo);
 
     assertThat(constraintViolations)
-        .as("it should have only one violation for invalid middle initial")
-        .hasSize(1)
-        .first()
-        .extracting(ConstraintViolation::getMessage)
-        .isEqualTo("Middle Initial cannot be empty");
+        .as("middle initial is optional so there should be no violations")
+        .isEmpty();
   }
 
   @Test

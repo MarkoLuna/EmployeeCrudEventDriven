@@ -57,7 +57,7 @@ public class EmployeeService {
    */
   public Optional<EmployeeDto> createEmployee(EmployeeInfo req) {
     var employeeMessage =
-        EmployeeMessage.builder().employee(req).operationType(EmployeeOperationType.CREATE).build();
+        EmployeeMessage.builder().employeeInfo(req).operationType(EmployeeOperationType.CREATE).build();
     Message<EmployeeMessage> message = MessageBuilder.withPayload(employeeMessage).build();
 
     employeeUpsertKafkaTemplate
@@ -89,7 +89,7 @@ public class EmployeeService {
     var employeeMessage =
         EmployeeMessage.builder()
             .employeeId(employeeId)
-            .employee(employeeMapper.convert(empl))
+            .employeeInfo(employeeMapper.convert(empl))
             .operationType(EmployeeOperationType.UPDATE)
             .build();
     Message<EmployeeMessage> message = MessageBuilder.withPayload(employeeMessage).build();

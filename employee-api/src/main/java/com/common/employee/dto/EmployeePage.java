@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class EmployeePage {
   private int pageNumber;
   private int pageSize;
-  long offset;
-  Sort sort;
+  private long offset;
+  private Sort sort;
   List<EmployeeDto> content;
 }

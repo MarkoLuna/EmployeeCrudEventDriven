@@ -166,7 +166,7 @@ class EmployeeServiceTest {
         .returns(EmployeeOperationType.UPDATE, EmployeeMessage::operationType)
         .satisfies(
             employeeMessage -> {
-              assertThat(employeeMessage.employee())
+              assertThat(employeeMessage.employeeInfo())
                   .as("employee information is correct")
                   .isNotNull()
                   .returns(req.firstName(), EmployeeInfo::firstName)

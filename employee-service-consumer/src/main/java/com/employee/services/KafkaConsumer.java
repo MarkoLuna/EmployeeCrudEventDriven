@@ -37,9 +37,9 @@ public class KafkaConsumer {
         return;
       }
       if (message.operationType() == EmployeeOperationType.CREATE) {
-        employeeService.createEmployee(message.employee());
+        employeeService.createEmployee(message.employeeInfo());
       } else if (message.operationType() == EmployeeOperationType.UPDATE) {
-        employeeService.updateEmployee(message.employeeId(), message.employee());
+        employeeService.updateEmployee(message.employeeId(), message.employeeInfo());
       } else {
         log.warn("unable to process record due to the operation type is invalid {}", message);
       }
@@ -83,7 +83,7 @@ public class KafkaConsumer {
           "Getting the ms365 event again. delivery attempt: [{}] the employeeId: [{}]",
           () -> deliveryAttempt,
           message::employeeId);
-      if (employeeService.employeeMatch(message.employeeId(), message.employee())) {
+      if (employeeService.employeeMatch(message.employeeId(), message.employeeInfo())) {
         log.info(
             "Record Already found, wont process.. delivery attempt: [{}] the employeeId: [{}]",
             () -> deliveryAttempt,
