@@ -1,6 +1,9 @@
 package com.common.employee.enums;
 
+/** Enum to represent the sort order. */
 public enum Sort {
+  /** Descending sort order. */
   DESCENDING,
-  ASCENDING;
+  /** Ascending sort order. */
+  ASCENDING
 }

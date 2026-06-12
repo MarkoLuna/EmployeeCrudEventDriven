@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/** Data Transfer Object for an employee page. */
 @Data
 @Builder
 @AllArgsConstructor

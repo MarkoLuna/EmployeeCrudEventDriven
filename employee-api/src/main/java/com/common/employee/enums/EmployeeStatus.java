@@ -1,6 +1,9 @@
 package com.common.employee.enums;
 
+/** Enum to represent the status of an employee. */
 public enum EmployeeStatus {
-  ACTIVE(),
-  INACTIVE();
+  /** Active employee status. */
+  ACTIVE,
+  /** Inactive employee status. */
+  INACTIVE
 }

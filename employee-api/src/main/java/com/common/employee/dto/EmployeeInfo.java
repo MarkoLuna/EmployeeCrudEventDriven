@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import lombok.Builder;
 
+/** Data Transfer Object for employee information. */
 @Builder
 public record EmployeeInfo(
     @NotBlank(message = "First Name cannot be empty")
