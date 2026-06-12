@@ -3,6 +3,7 @@ package com.employee.services;
 import static java.util.Objects.isNull;
 
 import com.common.employee.dto.EmployeeMessage;
+import com.common.employee.enums.EmployeeStatus;
 import com.common.employee.exceptions.EmployeeNotFound;
 import com.employee.exceptions.RetryableMessagingException;
 import lombok.RequiredArgsConstructor;
@@ -60,8 +61,19 @@ public class KafkaConsumer {
           Integer nonBlockingAttempts) {
     var entry = log.traceEntry("listenEmployeeDeletionMessage: {}", message);
     try {
-      if (recordAlreadyProcessed(nonBlockingAttempts, message)) {
-        return;
+      int deliveryAttempt = isNull(nonBlockingAttempts) ? 0 : nonBlockingAttempts;
+      if (deliveryAttempt > 0) {
+        log.info(
+            "Getting the ms365 event again. delivery attempt: [{}] the employeeId: [{}]",
+            () -> deliveryAttempt,
+            message::employeeId);
+        if (employeeService.employeeMatch(message.employeeId(), EmployeeStatus.INACTIVE)) {
+          log.info(
+              "Record Already found, wont process.. delivery attempt: [{}] the employeeId: [{}]",
+              () -> deliveryAttempt,
+              message::employeeId);
+          return;
+        }
       }
       employeeService.deleteEmployee(message.employeeId());
       log.traceExit(entry);

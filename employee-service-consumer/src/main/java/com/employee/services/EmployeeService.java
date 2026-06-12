@@ -71,7 +71,8 @@ public class EmployeeService {
         employeeRepository
             .findByIdAndStatus(id, EmployeeStatus.ACTIVE)
             .orElseThrow(() -> new EmployeeNotFound("Unable to find the employee"));
-    employeeRepository.deleteById(employee.getId());
+    employee.setStatus(EmployeeStatus.INACTIVE);
+    employeeRepository.save(employee);
   }
 
   public boolean employeeMatch(String id, EmployeeInfo employee) {
@@ -82,5 +83,9 @@ public class EmployeeService {
         .findByIdAndStatus(id, employee.status())
         .map(employeeEntity::equals)
         .orElse(false);
+  }
+
+  public boolean employeeMatch(String id, EmployeeStatus status) {
+    return employeeRepository.findByIdAndStatus(id, status).isPresent();
   }
 }

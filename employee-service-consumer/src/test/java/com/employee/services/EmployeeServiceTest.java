@@ -154,7 +154,8 @@ class EmployeeServiceTest {
 
     assertThatCode(() -> employeeService.deleteEmployee(id)).doesNotThrowAnyException();
 
-    verify(employeeRepository).deleteById(id);
+    verify(employeeRepository).save(employeeCaptor.capture());
+    assertThat(employeeCaptor.getValue().getStatus()).isEqualTo(EmployeeStatus.INACTIVE);
   }
 
   private Employee createEmployeeEntity(String id) {
