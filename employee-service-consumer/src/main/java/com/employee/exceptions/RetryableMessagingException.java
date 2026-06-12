@@ -3,6 +3,7 @@ package com.employee.exceptions;
 import lombok.Getter;
 import org.apache.kafka.common.errors.RetriableException;
 
+/** Exception to be thrown when a retryable message exception is encountered. */
 @Getter
 public class RetryableMessagingException extends RetriableException {
 

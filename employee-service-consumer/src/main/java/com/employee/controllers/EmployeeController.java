@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,14 +22,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController
 @Tag(
     name = "Employees",
     description = "Set of endpoints for Creating, Retrieving, Updating and Deleting of Employees.")
+@RestController
 @Validated
+@RequiredArgsConstructor
 public class EmployeeController {
 
-  @Autowired private EmployeeService employeeService;
+  private final EmployeeService employeeService;
 
   @GetMapping("/employees/list/{page}/{size}")
   @ResponseStatus(HttpStatus.OK)

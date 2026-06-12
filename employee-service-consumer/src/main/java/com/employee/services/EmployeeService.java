@@ -10,36 +10,37 @@ import com.employee.mappers.EmployeeMapper;
 import com.employee.repositories.EmployeeRepository;
 import java.util.List;
 import java.util.Optional;
-import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class EmployeeService {
 
-  @Autowired private EmployeeRepository employeeRepository;
+  private final EmployeeRepository employeeRepository;
 
-  @Autowired private EmployeeMapper employeeMapper;
+  private final EmployeeMapper employeeMapper;
 
   public EmployeePage list(Integer page, Integer sizePage) {
     Sort orders = Sort.by(Sort.Direction.DESC, "dateOfEmployment");
     Page<Employee> employeeList =
         employeeRepository.findByStatus(
             EmployeeStatus.ACTIVE, PageRequest.of(page, sizePage, orders));
-    var result = employeeList.map(employeeMapper::convert);
 
-    return EmployeePage.builder().content(result.getContent()).pageSize(result.getSize()).build();
+    return EmployeePage.builder()
+        .content(employeeList.map(employeeMapper::convert).getContent())
+        .pageSize(employeeList.getSize())
+        .build();
   }
 
   public EmployeeDto getEmployee(String employeeId) throws EmployeeNotFound {
-    Optional<Employee> employee =
-        employeeRepository.findByIdAndStatus(employeeId, EmployeeStatus.ACTIVE);
-    return employeeMapper.convert(
-        employee.orElseThrow(() -> new EmployeeNotFound("Unable to find the Employee")));
+    return employeeRepository
+        .findByIdAndStatus(employeeId, EmployeeStatus.ACTIVE)
+        .map(employeeMapper::convert)
+        .orElseThrow(() -> new EmployeeNotFound("Unable to find the Employee"));
   }
 
   public Optional<EmployeeDto> createEmployee(EmployeeInfo req) {
@@ -57,10 +58,10 @@ public class EmployeeService {
 
   public EmployeeDto updateEmployee(String id, EmployeeInfo emplReq) throws EmployeeNotFound {
 
-    Optional<Employee> existingEmployee =
-        employeeRepository.findByIdAndStatus(id, EmployeeStatus.ACTIVE);
     Employee employee =
-        existingEmployee.orElseThrow(() -> new EmployeeNotFound("Unable to find the employee"));
+        employeeRepository
+            .findByIdAndStatus(id, EmployeeStatus.ACTIVE)
+            .orElseThrow(() -> new EmployeeNotFound("Unable to find the employee"));
 
     employee.setFirstName(emplReq.firstName());
     employee.setLastName(emplReq.lastName());
@@ -74,10 +75,10 @@ public class EmployeeService {
   }
 
   public void deleteEmployee(String id) throws EmployeeNotFound {
-    Optional<Employee> existanEmployee =
-        employeeRepository.findByIdAndStatus(id, EmployeeStatus.ACTIVE);
     Employee employee =
-        existanEmployee.orElseThrow(() -> new EmployeeNotFound("Unable to find the employee"));
+        employeeRepository
+            .findByIdAndStatus(id, EmployeeStatus.ACTIVE)
+            .orElseThrow(() -> new EmployeeNotFound("Unable to find the employee"));
     employeeRepository.deleteById(employee.getId());
   }
 

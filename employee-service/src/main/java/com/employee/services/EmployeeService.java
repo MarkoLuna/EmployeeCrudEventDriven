@@ -23,15 +23,35 @@ public class EmployeeService {
   private final EmployeeClient employeeClient;
   private final EmployeeMapper employeeMapper;
 
+  /**
+   * List all employees.
+   *
+   * @param page the page number
+   * @param sizePage the page size
+   * @return the list of employees
+   */
   public EmployeePage list(Integer page, Integer sizePage) {
     return employeeClient.listEmployees(page, sizePage);
   }
 
+  /**
+   * Get an employee by id.
+   *
+   * @param employeeId the employee id
+   * @return the employee
+   */
   public EmployeeDto getEmployee(String employeeId) throws EmployeeNotFound {
-    Optional<EmployeeDto> employee = employeeClient.getEmployee(employeeId);
-    return employee.orElseThrow(() -> new EmployeeNotFound("Unable to find the Employee"));
+    return employeeClient
+        .getEmployee(employeeId)
+        .orElseThrow(() -> new EmployeeNotFound("Unable to find the Employee"));
   }
 
+  /**
+   * Create an employee.
+   *
+   * @param req the employee info
+   * @return the employee
+   */
   public Optional<EmployeeDto> createEmployee(EmployeeInfo req) {
     var employeeMessage =
         EmployeeMessage.builder().employee(req).operationType(EmployeeOperationType.CREATE).build();
@@ -55,6 +75,13 @@ public class EmployeeService {
     return Optional.ofNullable(employeeMapper.convert(req));
   }
 
+  /**
+   * Update an employee.
+   *
+   * @param employeeId the employee id
+   * @param empl the employee
+   * @return the employee
+   */
   public EmployeeDto updateEmployee(String employeeId, EmployeeDto empl) {
     var employeeMessage =
         EmployeeMessage.builder()
@@ -82,6 +109,11 @@ public class EmployeeService {
     return empl;
   }
 
+  /**
+   * Delete an employee.
+   *
+   * @param id the employee id
+   */
   public void deleteEmployee(String id) {
     var employeeMessage =
         EmployeeMessage.builder()
