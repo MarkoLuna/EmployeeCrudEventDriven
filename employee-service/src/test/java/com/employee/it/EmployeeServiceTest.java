@@ -188,8 +188,14 @@ public class EmployeeServiceTest {
                 .with(jwt())
                 .content(
                     asJsonString(
-                        new EmployeeInfo(
-                            "Gerardo", "J", "Luna", BASIC_DATE, BASIC_DATE, EmployeeStatus.ACTIVE)))
+                        EmployeeDto.builder()
+                            .firstName("Gerardo")
+                            .middleInitial("J")
+                            .lastName("Luna")
+                            .dateOfBirth(BASIC_DATE)
+                            .dateOfEmployment(BASIC_DATE)
+                            .status(EmployeeStatus.ACTIVE)
+                            .build()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isAccepted())

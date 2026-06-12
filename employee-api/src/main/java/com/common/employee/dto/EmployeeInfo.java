@@ -15,8 +15,7 @@ public record EmployeeInfo(
     @NotBlank(message = "First Name cannot be empty")
         @Schema(description = "employee first name", example = "Jose Marcos")
         String firstName,
-    @Size(max = 1)
-        @Schema(description = "employee middle initial", example = "M")
+    @Size(max = 1) @Schema(description = "employee middle initial", example = "M")
         String middleInitial,
     @NotBlank(message = "Last Name cannot be empty")
         @Schema(description = "employee last name", example = "Luna")

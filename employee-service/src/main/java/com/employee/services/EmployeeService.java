@@ -57,7 +57,10 @@ public class EmployeeService {
    */
   public Optional<EmployeeDto> createEmployee(EmployeeInfo req) {
     var employeeMessage =
-        EmployeeMessage.builder().employeeInfo(req).operationType(EmployeeOperationType.CREATE).build();
+        EmployeeMessage.builder()
+            .employeeInfo(req)
+            .operationType(EmployeeOperationType.CREATE)
+            .build();
     Message<EmployeeMessage> message = MessageBuilder.withPayload(employeeMessage).build();
 
     employeeUpsertKafkaTemplate
@@ -72,7 +75,7 @@ public class EmployeeService {
                     result.getRecordMetadata().offset(),
                     result.getProducerRecord().value());
               } else {
-                log.warn("Failed to send employee record to kafka", ex);
+                log.error("Failed to send employee record to kafka", ex);
               }
             });
     return Optional.ofNullable(employeeMapper.convert(req));
@@ -106,7 +109,7 @@ public class EmployeeService {
                     result.getRecordMetadata().offset(),
                     result.getProducerRecord().value());
               } else {
-                log.warn("Failed to send employee record to kafka", ex);
+                log.error("Failed to send employee record to kafka", ex);
               }
             });
     return empl;
@@ -137,7 +140,7 @@ public class EmployeeService {
                     result.getRecordMetadata().offset(),
                     result.getProducerRecord().value());
               } else {
-                log.warn("Failed to send employee record to kafka", ex);
+                log.error("Failed to send employee record to kafka", ex);
               }
             });
   }

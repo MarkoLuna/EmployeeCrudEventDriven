@@ -6,7 +6,14 @@ import feign.Param;
 import feign.RequestLine;
 import java.util.Optional;
 
-/** Client for employee service. */
+/**
+ * Feign client in the employee-service (producer) that calls the employee-service-consumer
+ * synchronously for read operations.
+ *
+ * <p>Write operations (create, update, delete) go through Kafka. This client is used only for GET
+ * and LIST endpoints, forwarding the Bearer token via {@link
+ * com.employee.config.AuthorizationInterceptor}.
+ */
 public interface EmployeeClient {
   /**
    * Get an employee by id.

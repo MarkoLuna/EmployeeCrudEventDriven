@@ -9,6 +9,12 @@ logging:
   level:
     org.springframework.security: trace
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
 ####### resource server configuration properties
 spring:
   application:
@@ -16,12 +22,6 @@ spring:
   threads:
     virtual:
       enabled: true
-  jpa:
-    defer-datasource-initialization: true
-    show-sql: true
-    generate-ddl: true
-    hibernate:
-      ddl-auto: create
   security:
     oauth2:
       client:
