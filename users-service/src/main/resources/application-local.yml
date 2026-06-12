@@ -1,0 +1,35 @@
+server:
+  port: 8084
+
+spring:
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            client-id: dev-realm
+            issuer-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081/realms/dev
+          user-name-attribute: preferred_username
+
+spring.security.oauth2.client:
+  registration:
+    dev-realm:
+      provider: keycloak
+      client-id: newClient
+      client-secret: newClientSecret
+      authorization-grant-type: authorization_code
+      scope: openid,profile,email
+      redirect-uri: http://localhost:8081/login/oauth2/code/dev-realm
+      client-name: "NSA2 Keycloak"
+      client-authentication-method: client_secret_basic
+
+app:
+  keycloak:
+    realm: dev
+
+services:
+  iam-service:
+    base-url: http://localhost:8081
