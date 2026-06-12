@@ -3,12 +3,10 @@ package com.employee.services;
 import static java.util.Objects.isNull;
 
 import com.common.employee.dto.EmployeeMessage;
-import com.common.employee.enums.EmployeeOperationType;
 import com.common.employee.exceptions.EmployeeNotFound;
 import com.employee.exceptions.RetryableMessagingException;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.retrytopic.RetryTopicHeaders;
 import org.springframework.messaging.Message;
@@ -18,15 +16,15 @@ import org.springframework.stereotype.Component;
 
 @Log4j2
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class KafkaConsumer {
 
-  @Autowired private EmployeeService employeeService;
+  private final EmployeeService employeeService;
 
   @KafkaListener(
       topics = "${kafka.consumer.employee-upsert-topic}",
       autoStartup = "${kafka.consumer.enabled:false}",
-      containerFactory = "employeeUpsertKafkaListenerContainerFactory")
+      containerFactory = "employeeKafkaListenerContainerFactory")
   public void listenEmployeeUpsert(
       @Payload EmployeeMessage message,
       @Header(name = RetryTopicHeaders.DEFAULT_HEADER_ATTEMPTS, required = false)
@@ -36,12 +34,11 @@ public class KafkaConsumer {
       if (recordAlreadyProcessed(nonBlockingAttempts, message)) {
         return;
       }
-      if (message.operationType() == EmployeeOperationType.CREATE) {
-        employeeService.createEmployee(message.employeeInfo());
-      } else if (message.operationType() == EmployeeOperationType.UPDATE) {
-        employeeService.updateEmployee(message.employeeId(), message.employeeInfo());
-      } else {
-        log.warn("unable to process record due to the operation type is invalid {}", message);
+      switch (message.operationType()) {
+        case CREATE -> employeeService.createEmployee(message.employeeInfo());
+        case UPDATE -> employeeService.updateEmployee(message.employeeId(), message.employeeInfo());
+        default ->
+            log.warn("unable to process record due to the operation type is invalid {}", message);
       }
       log.traceExit(entry);
     } catch (EmployeeNotFound ex) {
@@ -49,13 +46,14 @@ public class KafkaConsumer {
       throw RetryableMessagingException.fromException(ex);
     } catch (Exception exception) {
       log.error("Unable to process employee upsert message", exception);
+      throw exception;
     }
   }
 
   @KafkaListener(
       topics = "${kafka.consumer.employee-deletion-topic}",
       autoStartup = "${kafka.consumer.enabled:false}",
-      containerFactory = "employeeDeletionKafkaListenerContainerFactory")
+      containerFactory = "employeeKafkaListenerContainerFactory")
   public void listenEmployeeDeletion(
       @Payload EmployeeMessage message,
       @Header(name = RetryTopicHeaders.DEFAULT_HEADER_ATTEMPTS, required = false)
@@ -72,9 +70,14 @@ public class KafkaConsumer {
       throw RetryableMessagingException.fromException(ex);
     } catch (Exception exception) {
       log.error("Unable to process employee deletion message", exception);
+      throw exception;
     }
   }
 
+  // FIXME: This only catches non-blocking retry deliveries. A consumer rebalance or
+  // unclean shutdown may cause duplicate deliveries not handled here.
+  // Implement persistent deduplication by storing Kafka message IDs in a MongoDB
+  // collection and checking before processing.
   private boolean recordAlreadyProcessed(Integer nonBlockingAttempts, EmployeeMessage message) {
     int deliveryAttempt = isNull(nonBlockingAttempts) ? 0 : nonBlockingAttempts;
     if (deliveryAttempt > 0) {

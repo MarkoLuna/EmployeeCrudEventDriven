@@ -1,32 +1,21 @@
 package com.employee.controllers;
 
 import com.common.employee.dto.EmployeeDto;
-import com.common.employee.dto.EmployeeInfo;
 import com.common.employee.dto.EmployeePage;
-import com.common.employee.exceptions.InvalidDataException;
 import com.employee.services.EmployeeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(
-    name = "Employees",
-    description = "Set of endpoints for Creating, Retrieving, Updating and Deleting of Employees.")
+@Tag(name = "Employees", description = "Set of endpoints for Retrieving Employees.")
 @RestController
-@Validated
 @RequiredArgsConstructor
 public class EmployeeController {
 
@@ -65,46 +54,5 @@ public class EmployeeController {
           String employeeId) {
 
     return employeeService.getEmployee(employeeId);
-  }
-
-  @PostMapping("/employees")
-  @ResponseStatus(HttpStatus.OK)
-  @Operation(summary = "Creates a new employee.")
-  @SecurityRequirement(name = "Bearer Authentication")
-  public EmployeeDto saveEmployee(
-      @Parameter(description = "Employee information for a new employee to be created.")
-          @Valid
-          @RequestBody
-          EmployeeInfo request) {
-
-    return employeeService
-        .createEmployee(request)
-        .orElseThrow(() -> new InvalidDataException("Employee already exists .."));
-  }
-
-  @PutMapping(value = "/employees/{id}")
-  @ResponseStatus(HttpStatus.OK)
-  @SecurityRequirement(name = "Bearer Authentication")
-  public EmployeeDto updateEmployee(
-      @PathVariable("id") String employeeId, @Valid @RequestBody EmployeeInfo request) {
-
-    return employeeService.updateEmployee(employeeId, request);
-  }
-
-  @DeleteMapping("/employees/{id}")
-  @ResponseStatus(HttpStatus.OK)
-  @Operation(
-      summary =
-          "Deletes a employee from the system. 404 if the employee's identifier is not found.")
-  @SecurityRequirement(name = "Bearer Authentication")
-  public void deleteEmployee(
-      @Parameter(
-              required = true,
-              name = "id",
-              description = "Id of the employee to be deleted. Cannot be empty.")
-          @PathVariable("id")
-          String employeeId) {
-
-    employeeService.deleteEmployee(employeeId);
   }
 }

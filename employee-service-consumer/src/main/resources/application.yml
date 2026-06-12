@@ -13,12 +13,6 @@ logging:
 spring:
   application:
     name: employee-service-consumer
-  jpa:
-    defer-datasource-initialization: true
-    show-sql: true
-    generate-ddl: true
-    hibernate:
-      ddl-auto: create
   security:
     oauth2:
       client:

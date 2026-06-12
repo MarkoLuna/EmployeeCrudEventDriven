@@ -1,20 +1,15 @@
 package com.employee.entities;
 
 import com.common.employee.enums.EmployeeStatus;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import java.time.LocalDate;
 import lombok.Data;
 import lombok.ToString;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
 @ToString
-@Entity
-@Table(name = "employee")
+@Document(collection = "employee")
 public class Employee {
 
   @Id private String id;
@@ -25,7 +20,5 @@ public class Employee {
   private LocalDate dateOfBirth;
   private LocalDate dateOfEmployment;
 
-  @Enumerated(EnumType.STRING)
-  @Column(length = 15)
   private EmployeeStatus status;
 }

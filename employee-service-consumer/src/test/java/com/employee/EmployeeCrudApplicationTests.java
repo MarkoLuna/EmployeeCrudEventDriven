@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@Disabled
+@Disabled("fix integration test")
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @ActiveProfiles("test")

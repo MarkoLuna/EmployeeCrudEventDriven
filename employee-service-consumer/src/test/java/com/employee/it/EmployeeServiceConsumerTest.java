@@ -3,22 +3,11 @@ package com.employee.it;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.common.employee.dto.EmployeeInfo;
-import com.common.employee.enums.EmployeeStatus;
 import com.employee.EmployeeConsumerServiceApplication;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import java.time.LocalDate;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,7 +24,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@Disabled
+@Disabled("fix integration test")
 @SpringBootTest(
     classes = {
       EmployeeConsumerServiceApplication.class,
@@ -46,19 +35,9 @@ import org.springframework.test.web.servlet.MockMvc;
 @EnableAutoConfiguration(exclude = {KafkaAutoConfiguration.class})
 public class EmployeeServiceConsumerTest {
 
-  private static final LocalDate BASIC_DATE = LocalDate.of(2012, 9, 17);
-
   @Autowired private MockMvc mockMvc;
 
   @MockitoBean ClientRegistrationRepository registrations;
-
-  private static ObjectMapper objectMapper = new ObjectMapper();
-
-  @BeforeAll
-  static void setUp() {
-    objectMapper.registerModule(new JavaTimeModule());
-    objectMapper.registerModule(new Jdk8Module());
-  }
 
   @DisplayName("List all employees")
   @Test
@@ -106,84 +85,6 @@ public class EmployeeServiceConsumerTest {
         .perform(
             get("/employees/{id}", "invalid-id").with(jwt()).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
-  }
-
-  @DisplayName("Create a new employee")
-  @Test
-  void createEmployee() throws Exception {
-    when(registrations.findByRegistrationId(anyString())).thenReturn(buildClientRegistration());
-
-    mockMvc
-        .perform(
-            post("/employees")
-                .with(jwt())
-                .content(
-                    asJsonString(
-                        new EmployeeInfo(
-                            "Gerardo2",
-                            "J",
-                            "Luna",
-                            BASIC_DATE,
-                            BASIC_DATE,
-                            EmployeeStatus.ACTIVE)))
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.id").exists());
-  }
-
-  @DisplayName("Create a new employee with invalid request")
-  @Test
-  void createEmployeeWithInvalidRequest() throws Exception {
-    when(registrations.findByRegistrationId(anyString())).thenReturn(buildClientRegistration());
-
-    mockMvc
-        .perform(
-            post("/employees")
-                .with(jwt())
-                .content(asJsonString(new EmployeeInfo("", "", "", null, null, null)))
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isBadRequest());
-  }
-
-  @DisplayName("Update employee")
-  @Test
-  void updateEmployee() throws Exception {
-    when(registrations.findByRegistrationId(anyString())).thenReturn(buildClientRegistration());
-
-    mockMvc
-        .perform(
-            put("/employees/{id}", "e26b1ed4-a8d0-11e9-a2a3-2a2ae2dbcce4")
-                .with(jwt())
-                .content(
-                    asJsonString(
-                        new EmployeeInfo(
-                            "Gerardo", "J", "Luna", BASIC_DATE, BASIC_DATE, EmployeeStatus.ACTIVE)))
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.firstName").value("Gerardo"))
-        .andExpect(jsonPath("$.lastName").value("Luna"));
-  }
-
-  @DisplayName("Delete employee")
-  @Test
-  void deleteEmployee() throws Exception {
-    when(registrations.findByRegistrationId(anyString())).thenReturn(buildClientRegistration());
-
-    mockMvc
-        .perform(delete("/employees/{id}", "e26b1d76-a8d0-11e9-a2a3-2a2ae2dbcce4").with(jwt()))
-        .andExpect(status().isOk());
-  }
-
-  @org.springframework.lang.NonNull
-  public static String asJsonString(final Object obj) {
-    try {
-      return objectMapper.writeValueAsString(obj);
-    } catch (JsonProcessingException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   private ClientRegistration buildClientRegistration() {

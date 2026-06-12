@@ -25,25 +25,13 @@ import org.springframework.kafka.retrytopic.RetryTopicConfigurationBuilder;
 import org.springframework.kafka.support.serializer.DelegatingByTypeSerializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
-import org.springframework.messaging.Message;
 
 @EnableKafka
 @Configuration
 public class KafkaConsumerConfig {
 
   @Bean
-  public ConsumerFactory<String, EmployeeMessage> employeeUpsertConsumerFactory(
-      KafkaConfigProperties kafkaConfigProperties) {
-    Map<String, Object> props = new HashMap<>();
-    props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConfigProperties.getBootstrapServers());
-    props.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaConfigProperties.getGroupId());
-
-    return new DefaultKafkaConsumerFactory<String, EmployeeMessage>(
-        props, new StringDeserializer(), new JsonDeserializer<>(EmployeeMessage.class));
-  }
-
-  @Bean
-  public ConsumerFactory<String, EmployeeMessage> employeeDeletionConsumerFactory(
+  public ConsumerFactory<String, EmployeeMessage> employeeConsumerFactory(
       KafkaConfigProperties kafkaConfigProperties) {
     Map<String, Object> props = new HashMap<>();
     props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConfigProperties.getBootstrapServers());
@@ -55,35 +43,20 @@ public class KafkaConsumerConfig {
 
   @Bean
   public ConcurrentKafkaListenerContainerFactory<String, EmployeeMessage>
-      employeeUpsertKafkaListenerContainerFactory(
-          ConsumerFactory<String, EmployeeMessage> employeeUpsertConsumerFactory,
+      employeeKafkaListenerContainerFactory(
+          ConsumerFactory<String, EmployeeMessage> employeeConsumerFactory,
           KafkaConfigProperties kafkaConfigProperties) {
 
     ConcurrentKafkaListenerContainerFactory<String, EmployeeMessage> factory =
         new ConcurrentKafkaListenerContainerFactory<>();
 
     factory.setConcurrency(kafkaConfigProperties.getConcurrency());
-    factory.setConsumerFactory(employeeUpsertConsumerFactory);
-    return factory;
-  }
-
-  @Bean
-  public ConcurrentKafkaListenerContainerFactory<String, EmployeeMessage>
-      employeeDeletionKafkaListenerContainerFactory(
-          ConsumerFactory<String, EmployeeMessage> employeeDeletionConsumerFactory,
-          KafkaConfigProperties kafkaConfigProperties) {
-
-    ConcurrentKafkaListenerContainerFactory<String, EmployeeMessage> factory =
-        new ConcurrentKafkaListenerContainerFactory<>();
-
-    factory.setConcurrency(kafkaConfigProperties.getConcurrency());
-    factory.setConsumerFactory(employeeDeletionConsumerFactory);
+    factory.setConsumerFactory(employeeConsumerFactory);
     return factory;
   }
 
   /**
-   * Configures a retry topic with the {@link
-   * com.employee.services.KafkaConsumer#handleDltForEmployeeDeletion(Message)} handler.
+   * Configures a retry topic with the deletion DLT handler.
    *
    * @param employeeKafkaTemplate the template to configure with retries.
    * @return the Retry configuration.
@@ -92,22 +65,15 @@ public class KafkaConsumerConfig {
   public RetryTopicConfiguration employeeDeletionRetryConfig(
       KafkaTemplate<String, Object> employeeKafkaTemplate,
       KafkaConfigProperties kafkaConfigProperties) {
-    return RetryTopicConfigurationBuilder.newInstance()
-        .fixedBackOff(kafkaConfigProperties.getEventNonBlockingRetry().getPeriod().toMillis())
-        .maxAttempts(kafkaConfigProperties.getEventNonBlockingRetry().getMaxAttempts())
-        .timeoutAfter(kafkaConfigProperties.getEventNonBlockingRetry().getMaxPeriod().toMillis())
-        .includeTopic(kafkaConfigProperties.getEmployeeDeletionTopic())
-        // Just retry this exception
-        .retryOn(RetryableMessagingException.class)
-        .doNotAutoCreateRetryTopics()
-        .dltProcessingFailureStrategy(DltStrategy.FAIL_ON_ERROR)
-        .dltHandlerMethod("kafkaConsumer", "handleDltForEmployeeDeletion")
-        .create(employeeKafkaTemplate);
+    return buildRetryConfig(
+        employeeKafkaTemplate,
+        kafkaConfigProperties,
+        kafkaConfigProperties.getEmployeeDeletionTopic(),
+        "handleDltForEmployeeDeletion");
   }
 
   /**
-   * Configures a retry topic with the {@link
-   * com.employee.services.KafkaConsumer#handleDltForEmployeeUpsert(Message)} handler.
+   * Configures a retry topic with the upsert DLT handler.
    *
    * @param employeeKafkaTemplate the template to configure with retries.
    * @return the Retry configuration.
@@ -116,16 +82,28 @@ public class KafkaConsumerConfig {
   public RetryTopicConfiguration employeeUpsertRetryConfig(
       KafkaTemplate<String, Object> employeeKafkaTemplate,
       KafkaConfigProperties kafkaConfigProperties) {
+    return buildRetryConfig(
+        employeeKafkaTemplate,
+        kafkaConfigProperties,
+        kafkaConfigProperties.getEmployeeUpsertTopic(),
+        "handleDltForEmployeeUpsert");
+  }
+
+  private RetryTopicConfiguration buildRetryConfig(
+      KafkaTemplate<String, Object> employeeKafkaTemplate,
+      KafkaConfigProperties kafkaConfigProperties,
+      String topic,
+      String dltHandler) {
+    var retry = kafkaConfigProperties.getEventNonBlockingRetry();
     return RetryTopicConfigurationBuilder.newInstance()
-        .fixedBackOff(kafkaConfigProperties.getEventNonBlockingRetry().getPeriod().toMillis())
-        .maxAttempts(kafkaConfigProperties.getEventNonBlockingRetry().getMaxAttempts())
-        .timeoutAfter(kafkaConfigProperties.getEventNonBlockingRetry().getMaxPeriod().toMillis())
-        .includeTopic(kafkaConfigProperties.getEmployeeUpsertTopic())
-        // Just retry this exception
+        .fixedBackOff(retry.getPeriod().toMillis())
+        .maxAttempts(retry.getMaxAttempts())
+        .timeoutAfter(retry.getMaxPeriod().toMillis())
+        .includeTopic(topic)
         .retryOn(RetryableMessagingException.class)
         .doNotAutoCreateRetryTopics()
         .dltProcessingFailureStrategy(DltStrategy.FAIL_ON_ERROR)
-        .dltHandlerMethod("kafkaConsumer", "handleDltForEmployeeUpsert")
+        .dltHandlerMethod("kafkaConsumer", dltHandler)
         .create(employeeKafkaTemplate);
   }
 
