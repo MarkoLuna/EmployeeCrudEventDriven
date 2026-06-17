@@ -11,6 +11,14 @@
 - Maven enforcer auto-runs: requires Java >=21, Maven >=3.3, dependency convergence.
 - Run single module: `./mvnw clean install -pl employee-service -am` (includes deps).
 
+## Technology Stack & Versions
+
+- **Core**: Java 21 (LTS), Spring Boot 3.4.4, Spring Cloud 2024.0.x, Maven
+- **Security**: Keycloak (v26.1.2) on management port 9000, OAuth2/OIDC/JWT, Spring Security 6.4.4
+- **Databases & Messaging**: Apache Kafka, PostgreSQL (Keycloak/internal), MongoDB, Spring Data JPA & MongoDB
+- **APIs & Docs**: OpenAPI 3/Swagger UI (`springdoc-openapi-starter-webmvc-ui` v2.8.6), Feign
+- **Infra & Tooling**: Docker & Docker Compose, Nginx, Bruno (`EmployeeCrud/` directory)
+
 ## Architecture (CQRS-lite + EDA)
 
 | Service | Role | Port (local) | Port (docker) |
@@ -22,8 +30,10 @@
 
 - **Writes** (POST/PUT/DELETE): producer validates → publishes to Kafka → returns 202 → consumer persists.
 - **Reads** (GET/LIST): producer calls consumer synchronously via Feign (JWT forwarded).
-- Kafka topics: `employee-upsert.v1`, `employee-deletion.v1` (1 partition, 1 replica).
-- Consumer uses non-blocking retry (max 3, 5m backoff) with DLT; retries only `RetryableMessagingException`.
+- **EDA & Idempotency**: Use EDA for state changes. Consumer event handlers must be idempotent to prevent duplicate processing.
+- **Kafka Topics**: Named `<resource>-<action>.<version>` (e.g., `employee-upsert.v1`, `employee-deletion.v1`). 1 partition, 1 replica.
+- **Kafka Headers**: Include correlation IDs and timestamps in Kafka headers for traceability.
+- **Consumer Retry**: Uses non-blocking retry (max 3, 5m backoff) with DLT; retries only `RetryableMessagingException`.
 
 ## Run Locally
 
@@ -60,12 +70,14 @@
 
 ## Notable Conventions
 
+- **DDD & API Boundaries**: Keep business logic in services/domains, and use DTOs for API boundaries.
 - **Lombok**: `@Data`, `@Builder`, `@RequiredArgsConstructor` throughout.
 - **Mappers**: Hand-written implementations (no MapStruct), prefixed `@Component`.
 - **Logging**: Log4j2 (excludes Spring Boot default logging), with ELK profile for TCP socket to logstash:5044.
 - **Virtual threads**: Enabled on producer (`spring.threads.virtual.enabled: true`).
-- **Error handling**: `@RestControllerAdvice` communicates errors via `app-context-error` response header.
+- **Error handling**: Custom exceptions (e.g., `EmployeeNotFound`) handled via `@RestControllerAdvice`, communicating errors via `app-context-error` response header.
 - **AssertJ assertions**: Auto-generated from DTOs via `assertj-assertions-generator-maven-plugin` in `employee-api`.
+- **Git & Documentation**: Use descriptive commit messages. Always update documentation (README, diagrams) when changing API contracts or infrastructure.
 
 ## Quirks & Known Issues
 
@@ -78,6 +90,4 @@
 
 ## Existing Guidelines
 
-- `.gemini/CONVENTIONS.md` — EDA idempotency, DDD, Kafka topic naming conventions.
-- `.gemini/STACK.md` — stack version reference.
 - `TODO.md` — future ideas (MapStruct, GraalVM, GraphQL, etc.).

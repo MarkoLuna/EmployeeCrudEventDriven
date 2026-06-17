@@ -27,5 +27,3 @@ bin/
 /dist/
 /nbdist/
 
-### VS Code ###
-.vscode/
