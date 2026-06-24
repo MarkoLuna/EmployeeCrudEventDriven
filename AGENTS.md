@@ -88,6 +88,7 @@
 - **Retry topics must exist**: `doNotAutoCreateRetryTopics=true`, so retry/DLT topics must be pre-created.
 - **MongoDB** via Spring Data JPA annotations (`@Entity`, `@Id`) — not a reactive stack.
 - **`--import-realm` overwrites user passwords**: `dev-users-0.json` has PBKDF2 hashes that don't match password `"123"`. On every `docker compose down/up`, `--import-realm` reimports the file and resets `mike@other.com`'s password to the wrong hash. Temp workaround: reset via admin API after restart. Permanent fix: replace hashes in `dev-users-0.json` with correctly generated ones for `"123"`, or remove `--import-realm` and implement conditional import.
+- **`JAVA_ARGS` env var not set** — All three service containers (`employee-service`, `employee-service-consumer`, `users-service`) reference `${JAVA_ARGS}` in their `JAVA_OPTS` in compose files, but the `.env` file doesn't define it. Every `docker compose` run prints `"JAVA_ARGS" variable is not set. Defaulting to a blank string.` Fix later: add `JAVA_ARGS=-Xmx512m -Xms256m` (or similar) to `docker/.env`.
 
 ## Existing Guidelines
 
