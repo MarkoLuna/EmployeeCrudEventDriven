@@ -56,6 +56,7 @@ The system is composed of several decoupled components:
 ├── employee-service/            # Producer service (REST API + Kafka Producer)
 ├── employee-service-consumer/   # Consumer service (Kafka Consumer + Persistence)
 ├── users-service/              # Users service (User Management + IAM Integration)
+├── integration-tests/           # E2E test suite (Cucumber + REST Assured)
 ├── .bruno/                      # Bruno API collection for testing
 ├── pom.xml                      # Root Maven configuration
 └── README.md                    # Project documentation
@@ -116,6 +117,29 @@ The following users are pre-configured in the `dev` realm:
 
 - **John Doe** (`john@test.com` / `123`): Has **`manage-users`**, **`view-users`**, **`query-users`** client roles in realm-management. Authorized to perform all user management and employee CRUD operations.
 - **Mike Smith** (`mike@other.com` / `123`): Has only **`account`** client roles. Authorized for employee operations but restricted from user management.
+
+---
+
+## End-to-End Testing
+
+The project includes a **Cucumber**-based E2E test suite that covers employee and user management workflows against running services.
+
+### Prerequisites
+Ensure the full system is running (infra + all 3 services) as described in [How to Run Locally](#how-to-run-locally).
+
+### Run
+```bash
+./mvnw verify -pl integration-tests -Pe2e
+```
+
+### Test Coverage
+- **Employee CRUD**: Create, retrieve, list, update, delete
+- **Employee Error Handling**: Validation errors (400), not found (404), unauthorized (401)
+- **User CRUD**: Create, retrieve by ID/username, list, update, delete
+- **User Authorization**: RBAC enforcement — forbidden for insufficient roles (403), unauthorized without token (401)
+
+### Feature Files
+Located in `integration-tests/src/test/resources/features/`. See [integration-tests/README.md](integration-tests/README.md) for details.
 
 ---
 
@@ -274,5 +298,5 @@ The project includes a [Bruno](https://www.usebruno.com/) collection for testing
 - **Messaging**: Apache Kafka & Zookeeper
 - **Persistence**: MongoDB, PostgreSQL (Spring Data JPA)
 - **API Documentation**: SpringDoc OpenAPI (Swagger)
-- **Testing**: Bruno API Client, JUnit 5, Testcontainers
+- **Testing**: Bruno API Client, JUnit 5, Cucumber 7, REST Assured
 - **Infrastructure**: Docker, Nginx

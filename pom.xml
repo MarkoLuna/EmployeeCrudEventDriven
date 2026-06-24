@@ -12,6 +12,7 @@
         <module>employee-service</module>
         <module>employee-service-consumer</module>
         <module>users-service</module>
+        <module>integration-tests</module>
     </modules>
 
     <groupId>com.employeecrud</groupId>
@@ -38,6 +39,9 @@
         <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
         <assertj-assertions-generator.version>2.2.1</assertj-assertions-generator.version>
         <assertj-assertions-generator-maven-plugin.version>2.2.0</assertj-assertions-generator-maven-plugin.version>
+        <cucumber.version>7.21.0</cucumber.version>
+        <rest-assured.version>5.5.0</rest-assured.version>
+        <junit-platform-suite.version>1.11.4</junit-platform-suite.version>
     </properties>
 
     <dependencyManagement>
@@ -127,6 +131,36 @@
                 <groupId>org.springframework.kafka</groupId>
                 <artifactId>spring-kafka-test</artifactId>
                 <version>${spring-kafka.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.cucumber</groupId>
+                <artifactId>cucumber-java</artifactId>
+                <version>${cucumber.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.cucumber</groupId>
+                <artifactId>cucumber-spring</artifactId>
+                <version>${cucumber.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.cucumber</groupId>
+                <artifactId>cucumber-junit-platform-engine</artifactId>
+                <version>${cucumber.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.rest-assured</groupId>
+                <artifactId>rest-assured</artifactId>
+                <version>${rest-assured.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.platform</groupId>
+                <artifactId>junit-platform-suite</artifactId>
+                <version>${junit-platform-suite.version}</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
