@@ -20,7 +20,7 @@ import org.springframework.context.annotation.Configuration;
             license =
                 @License(name = "Apache 2.0", url = "https://www.apache.org/licenses/LICENSE-2.0"),
             description = "User Management Service"),
-    servers = @Server(url = "http://localhost:8084", description = "Production"))
+    servers = @Server(url = "http://localhost:8080", description = "Production"))
 @SecurityScheme(
     name = "Bearer Authentication",
     type = SecuritySchemeType.HTTP,

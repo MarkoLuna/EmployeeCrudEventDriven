@@ -11,7 +11,9 @@ volumes:
 
 services:
   nginx:
-    image: nginx:stable-alpine
+    build:
+      context: ./nginx/
+      dockerfile: Dockerfile
     container_name: nginx-proxy
     restart: unless-stopped
     ports:
@@ -20,8 +22,6 @@ services:
       app-network:
         aliases:
           - localstack.lks.com
-    volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
 
   employee-service:
     build:
@@ -77,6 +77,32 @@ services:
     networks:
        - app-network
 
+  users-service:
+    build:
+      context: ../users-service/
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8084:8080"
+    environment:
+      - "JAVA_OPTS=${JAVA_ARGS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+      - "SPRING_PROFILES_ACTIVE=docker"
+    healthcheck:
+      test: curl --fail http://localhost:8080/actuator/health || exit 1
+      interval: 30s
+      retries: 15
+      start_period: 20s
+      timeout: 10s
+    depends_on:
+      keycloak-x:
+        condition: service_healthy
+      nginx:
+        condition: service_started
+    extra_hosts:
+      - "localstack.lks.com:host-gateway"
+    networks:
+      - app-network
+
   mongo:
     image: mongo
     restart: always
@@ -112,7 +138,9 @@ services:
 
   keycloak-x:
     container_name: ws-keycloak-x
-    image: docker.io/keycloak/keycloak:${KEYCLOAK_VERSION}
+    build:
+      context: ./keycloak/
+      dockerfile: Dockerfile
     command: ["start-dev", "--import-realm", "--verbose"]
     restart: unless-stopped
     ports:
@@ -131,14 +159,13 @@ services:
       KC_DB: postgres
       KC_DB_USERNAME: ${KEYCLOAK_POSTGRES_USER}
       KC_DB_PASSWORD: ${KEYCLOAK_POSTGRES_PASSWORD}
+      KC_HOSTNAME_URL: http://localstack.lks.com:8080
       KC_HOSTNAME_STRICT: "false"
       KC_HOSTNAME_STRICT_BACKCHANNEL: "false"
       KC_HOSTNAME_PORT: 8080
       KC_HEALTH_ENABLED: "true"
       KC_METRICS_ENABLED: "true"
       KC_HTTP_MANAGEMENT_PORT: 9000
-    volumes:
-      - ./keycloak/import/dev-realm:/opt/keycloak/data/import
     depends_on:
       keycloak-x-pg:
         condition: service_healthy
