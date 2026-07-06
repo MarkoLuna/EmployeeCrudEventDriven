@@ -31,7 +31,5 @@ bin/
 employee-crud-frontend/node_modules/
 employee-crud-frontend/dist/
 employee-crud-frontend/*.tsbuildinfo
-
-# Env files
-.env
+employee-crud-frontend/.env
 
