@@ -1,5 +1,6 @@
 package com.employee.services;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -12,14 +13,22 @@ import com.common.employee.dto.EmployeeInfo;
 import com.common.employee.dto.EmployeeMessage;
 import com.common.employee.enums.EmployeeOperationType;
 import com.common.employee.enums.EmployeeStatus;
+import com.employee.entities.DeadLetterMessage;
+import com.employee.repositories.DeadLetterRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 
 @ExtendWith(MockitoExtension.class)
 class KafkaConsumerTest {
@@ -31,17 +40,27 @@ class KafkaConsumerTest {
   private static final String EMPLOYEE_ID = "e26b1ed4-a8d0-11e9-a2a3-2a2ae2dbcce4";
   private static final LocalDate BASIC_DATE = LocalDate.of(2012, 9, 17);
 
+  private final ObjectMapper realObjectMapper =
+      new ObjectMapper().registerModule(new JavaTimeModule()).registerModule(new Jdk8Module());
+
   private EmployeeInfo employeeInfo;
 
   @Mock private EmployeeService employeeService;
 
   @Mock private DeduplicationService deduplicationService;
 
-  @InjectMocks private KafkaConsumer kafkaConsumer;
+  @Mock private DeadLetterRepository deadLetterRepository;
+
+  private KafkaConsumer kafkaConsumer;
+
+  @Captor private ArgumentCaptor<DeadLetterMessage> deadLetterCaptor;
 
   @BeforeEach
   void setUp() {
     employeeInfo = createEmployeeInfo();
+    kafkaConsumer =
+        new KafkaConsumer(
+            employeeService, deduplicationService, deadLetterRepository, realObjectMapper);
   }
 
   @DisplayName("Upsert listener skips processing when dedup key already exists")
@@ -239,6 +258,45 @@ class KafkaConsumerTest {
         .hasMessage("kaboom");
 
     verify(deduplicationService, never()).markProcessed(anyString());
+  }
+
+  @DisplayName("DLT handler for upsert persists dead letter message")
+  @Test
+  void handleDltForEmployeeUpsert_shouldPersistDeadLetter() {
+    var payload =
+        EmployeeMessage.builder()
+            .employeeId(EMPLOYEE_ID)
+            .employeeInfo(employeeInfo)
+            .operationType(EmployeeOperationType.CREATE)
+            .build();
+    Message<?> message = MessageBuilder.withPayload(payload).build();
+
+    kafkaConsumer.handleDltForEmployeeUpsert(message);
+
+    verify(deadLetterRepository).insert(deadLetterCaptor.capture());
+    var deadLetter = deadLetterCaptor.getValue();
+    assertThat(deadLetter.getOperationType()).isEqualTo("CREATE");
+    assertThat(deadLetter.getEmployeeId()).isEqualTo(EMPLOYEE_ID);
+    assertThat(deadLetter.getFailedAt()).isNotNull();
+  }
+
+  @DisplayName("DLT handler for deletion persists dead letter message")
+  @Test
+  void handleDltForEmployeeDeletion_shouldPersistDeadLetter() {
+    var payload =
+        EmployeeMessage.builder()
+            .employeeId(EMPLOYEE_ID)
+            .operationType(EmployeeOperationType.DELETE)
+            .build();
+    Message<?> message = MessageBuilder.withPayload(payload).build();
+
+    kafkaConsumer.handleDltForEmployeeDeletion(message);
+
+    verify(deadLetterRepository).insert(deadLetterCaptor.capture());
+    var deadLetter = deadLetterCaptor.getValue();
+    assertThat(deadLetter.getOperationType()).isEqualTo("DELETE");
+    assertThat(deadLetter.getEmployeeId()).isEqualTo(EMPLOYEE_ID);
+    assertThat(deadLetter.getFailedAt()).isNotNull();
   }
 
   private EmployeeInfo createEmployeeInfo() {

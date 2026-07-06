@@ -16,8 +16,11 @@ import com.common.employee.enums.EmployeeStatus;
 import com.common.employee.enums.Sort;
 import com.common.employee.exceptions.EmployeeNotFound;
 import com.employee.clients.EmployeeClient;
+import com.employee.exceptions.EmployeeServiceConsumerException;
 import com.employee.mappers.EmployeeMapper;
 import com.employee.mappers.EmployeeMapperImpl;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +35,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.messaging.Message;
@@ -197,5 +201,48 @@ class EmployeeServiceTest {
         .asInstanceOf(InstanceOfAssertFactories.type(EmployeeMessage.class))
         .extracting(EmployeeMessage::operationType)
         .isEqualTo(EmployeeOperationType.DELETE);
+  }
+
+  @DisplayName("list fallback returns empty page")
+  @Test
+  void listFallback_shouldReturnEmptyPage() throws Exception {
+    var result = invokeFallback("listFallback", 0, 10, new RuntimeException("test"));
+    assertThat(result).isInstanceOf(EmployeePage.class);
+    var page = (EmployeePage) result;
+    assertThat(page.getContent()).isEmpty();
+    assertThat(page.getPageNumber()).isZero();
+    assertThat(page.getPageSize()).isEqualTo(10);
+  }
+
+  @DisplayName(
+      "getEmployee fallback throws EmployeeServiceConsumerException with 503 when circuit is OPEN")
+  @Test
+  void getEmployeeFallback_shouldThrowServiceUnavailable() {
+    var cb = io.github.resilience4j.circuitbreaker.CircuitBreaker.ofDefaults("test");
+    var exception =
+        invokeFallback(
+            "getEmployeeFallback",
+            "test-id",
+            CallNotPermittedException.createCallNotPermittedException(cb));
+    assertThat(exception).isInstanceOf(EmployeeServiceConsumerException.class);
+    var svcEx = (EmployeeServiceConsumerException) exception;
+    assertThat(svcEx.getStatusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
+  }
+
+  private Object invokeFallback(String methodName, Object... args) {
+    try {
+      Class<?>[] paramTypes = new Class<?>[args.length];
+      for (int i = 0; i < args.length - 1; i++) {
+        paramTypes[i] = args[i].getClass();
+      }
+      paramTypes[args.length - 1] = Throwable.class;
+      var method = EmployeeService.class.getDeclaredMethod(methodName, paramTypes);
+      method.setAccessible(true);
+      return method.invoke(employeeService, args);
+    } catch (InvocationTargetException e) {
+      return e.getCause();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 }

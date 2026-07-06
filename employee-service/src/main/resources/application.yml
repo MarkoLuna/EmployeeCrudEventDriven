@@ -51,9 +51,8 @@ resilience4j:
         permitted-number-of-calls-in-half-open-state: 3
         automatic-transition-from-open-to-half-open-enabled: true
         record-exceptions:
-          - com.employee.exceptions.EmployeeServiceConsumerException
           - java.util.concurrent.TimeoutException
-          - feign.FeignException
+          - feign.RetryableException
     instances:
       employeeConsumer:
         base-config: default

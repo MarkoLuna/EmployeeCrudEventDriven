@@ -10,7 +10,7 @@ import com.employee.exceptions.RetryableMessagingException;
 import com.employee.repositories.DeadLetterRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -174,7 +174,7 @@ public class KafkaConsumer {
               .operationType(extractOperationType(payload))
               .payload(payload)
               .errorMessage(Objects.toString(exception, "unknown"))
-              .failedAt(LocalDateTime.now())
+              .failedAt(Instant.now())
               .build();
 
       deadLetterRepository.insert(deadLetter);
