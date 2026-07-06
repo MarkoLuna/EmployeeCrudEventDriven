@@ -30,7 +30,7 @@
         <spring-security.version>6.4.4</spring-security.version>
         <springdoc.version>2.8.6</springdoc.version>
         <spring-kafka.version>3.3.0</spring-kafka.version>
-        <openfeing.version>13.6</openfeing.version>
+        <openfeign.version>13.6</openfeign.version>
         <lombok.version>1.18.38</lombok.version>
         <validation.api.version>2.0.1.Final</validation.api.version>
         <spotless.version>2.44.2</spotless.version>
@@ -101,12 +101,12 @@
             <dependency>
                 <groupId>io.github.openfeign</groupId>
                 <artifactId>feign-core</artifactId>
-                <version>${openfeing.version}</version>
+                <version>${openfeign.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.openfeign</groupId>
                 <artifactId>feign-jackson</artifactId>
-                <version>${openfeing.version}</version>
+                <version>${openfeign.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.projectlombok</groupId>
@@ -147,7 +147,7 @@
             <dependency>
                 <groupId>io.github.openfeign</groupId>
                 <artifactId>feign-hc5</artifactId>
-                <version>${openfeing.version}</version>
+                <version>${openfeign.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.kafka</groupId>
