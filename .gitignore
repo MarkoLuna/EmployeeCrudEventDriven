@@ -29,4 +29,5 @@ bin/
 
 # FE app
 employee-crud-frontend/node_modules/
+employee-crud-frontend/dist/
 
