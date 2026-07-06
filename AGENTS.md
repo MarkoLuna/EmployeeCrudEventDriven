@@ -117,7 +117,10 @@ npm run lint                   # TypeScript type-check
 
 ## Quirks & Known Issues
 
-- **No CI/CD** — `.github/` only contains java-upgrade hooks, no workflows.
+- **CI/CD** — `.github/workflows/` has two PR workflows against `master`:
+  - `ci-java.yml` — Spotless check → `mvnw clean install`
+  - `ci-frontend.yml` — `tsc --noEmit` → `vitest run` → `vite build` → `npm audit --audit-level=high`
+  - Both use `paths` trigger filters to skip irrelevant changes.
 - **MongoDB** via Spring Data JPA annotations (`@Entity`, `@Id`) — not a reactive stack.
 - **`--import-realm` overwrites user passwords**: `dev-users-0.json` has PBKDF2 hashes that don't match password `"123"`. On every `docker compose down/up`, `--import-realm` reimports the file and resets `mike@other.com`'s password to the wrong hash. Temp workaround: reset via admin API after restart. Permanent fix: replace hashes in `dev-users-0.json` with correctly generated ones for `"123"`, or remove `--import-realm` and implement conditional import.
 

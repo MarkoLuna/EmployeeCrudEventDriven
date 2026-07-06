@@ -1,0 +1,43 @@
+name: Java CI
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'pom.xml'
+      - 'employee-api/**'
+      - 'employee-service/**'
+      - 'employee-service-consumer/**'
+      - 'users-service/**'
+      - 'integration-tests/**'
+      - '.mvn/**'
+      - 'mvnw'
+      - 'mvnw.cmd'
+      - 'version-number-rules.xml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+          cache: maven
+
+      - name: Check formatting (Spotless / Google Java Style)
+        run: ./mvnw spotless:check --no-transfer-progress
+
+      - name: Build and test
+        run: ./mvnw clean install --no-transfer-progress
+
