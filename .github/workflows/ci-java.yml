@@ -3,6 +3,17 @@ name: Java CI
 on:
   pull_request:
     branches: [master]
+    paths:
+      - 'pom.xml'
+      - 'employee-api/**'
+      - 'employee-service/**'
+      - 'employee-service-consumer/**'
+      - 'users-service/**'
+      - 'integration-tests/**'
+      - '.mvn/**'
+      - 'mvnw'
+      - 'mvnw.cmd'
+      - 'version-number-rules.xml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -12,31 +23,7 @@ permissions:
   contents: read
 
 jobs:
-  changes:
-    runs-on: ubuntu-latest
-    outputs:
-      java: ${{ steps.filter.outputs.java }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            java:
-              - 'pom.xml'
-              - 'employee-api/**'
-              - 'employee-service/**'
-              - 'employee-service-consumer/**'
-              - 'users-service/**'
-              - 'integration-tests/**'
-              - '.mvn/**'
-              - 'mvnw'
-              - 'mvnw.cmd'
-              - 'version-number-rules.xml'
-
   build:
-    needs: changes
-    if: ${{ needs.changes.outputs.java == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
