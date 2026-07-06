@@ -1,5 +1,9 @@
 server:
   port: 8080
+  forward-headers-strategy: framework
+
+springdoc:
+  use-forward-headers: true
 
 ####### resource server configuration properties
 spring:

@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,6 +46,25 @@ public class UserController {
       @Parameter(description = "User information for a new user to be created.") @Valid @RequestBody
           UserCreateRequest request) {
     userService.createUser(request);
+  }
+
+  @GetMapping("/me")
+  @ResponseStatus(HttpStatus.OK)
+  @PreAuthorize("isAuthenticated()")
+  @Operation(summary = "Returns the current user based on the JWT token.")
+  @SecurityRequirement(name = "Bearer Authentication")
+  public UserResponse getCurrentUser(@AuthenticationPrincipal Jwt jwt) {
+    return userService.getUserById(jwt.getSubject());
+  }
+
+  @PutMapping("/me")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @PreAuthorize("isAuthenticated()")
+  @Operation(summary = "Updates the current user's profile (firstName, lastName, email).")
+  @SecurityRequirement(name = "Bearer Authentication")
+  public void updateCurrentUser(
+      @AuthenticationPrincipal Jwt jwt, @Valid @RequestBody UserUpdateRequest request) {
+    userService.updateUser(jwt.getSubject(), request);
   }
 
   @GetMapping("/{id}")
