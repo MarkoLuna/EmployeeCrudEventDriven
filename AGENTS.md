@@ -118,7 +118,7 @@ npm run lint                   # TypeScript type-check
 ## Quirks & Known Issues
 
 - **CI/CD** — `.github/workflows/` has two PR workflows against `master`:
-  - `ci-java.yml` — Spotless check → `mvnw clean install` → OWASP Dependency Check (CVSS >= 7)
+  - `ci-java.yml` — Spotless check → `mvnw clean install`
   - `ci-frontend.yml` — `tsc --noEmit` → `vitest run` → `vite build` → `npm audit --audit-level=high`
   - Both use `paths` trigger filters to skip irrelevant changes.
 - **MongoDB** via Spring Data JPA annotations (`@Entity`, `@Id`) — not a reactive stack.
