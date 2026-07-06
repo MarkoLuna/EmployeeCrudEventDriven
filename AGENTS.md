@@ -125,16 +125,21 @@ npm run lint                   # TypeScript type-check
 
 ## Future Ideas
 
-See [TODO.md](TODO.md) for the full list. Highlights:
-
 - **GraalVM native image** — compile Spring Boot apps as native Docker images
+  - [Documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/native-image.html)
+  - [Example](https://medium.hexadefence.com/keycloak-admin-rest-api-63a294814e1b) - [Keycloak Api](https://www.keycloak.org/docs-api/21.1.1/rest-api/index.html)
+  - [Example 2](https://www.appsdeveloperblog.com/keycloak-rest-api-create-a-new-user/)
+  - [Spring Boot 3: Developing Your First GraalVM Native Application](https://docs.spring.io/spring-boot/docs/3.0.0/reference/htmlsingle/#native-image.developing-your-first-application)
 - **Spring Cloud Config** — externalized configuration server
+  - [Documentation](https://cloud.spring.io/spring-cloud-config/reference/html/)
 - **Protobuf** — class generation for binary serialization
+  - [Documentation](https://protobuf.dev/reference/java/java-generated/)
+
+### Fault Tolerance & Observability
+
 - **Micrometer metrics** — circuit breaker state transition metrics
 - **Distributed tracing** — Micrometer Tracing (Brave/OpenTelemetry)
 - **Admin alerting** — notify on circuit breaker open/closed state changes
 - **Caching layer** — Redis/Caffeine for employee read fallback
 
 ## Existing Guidelines
-
-- `TODO.md` — future ideas.
