@@ -101,7 +101,6 @@ public class KafkaConsumerConfig {
         .timeoutAfter(retry.getMaxPeriod().toMillis())
         .includeTopic(topic)
         .retryOn(RetryableMessagingException.class)
-        .doNotAutoCreateRetryTopics()
         .dltProcessingFailureStrategy(DltStrategy.FAIL_ON_ERROR)
         .dltHandlerMethod("kafkaConsumer", dltHandler)
         .create(employeeKafkaTemplate);
