@@ -123,6 +123,18 @@ npm run lint                   # TypeScript type-check
 - **MongoDB** via Spring Data JPA annotations (`@Entity`, `@Id`) — not a reactive stack.
 - **`--import-realm` overwrites user passwords**: `dev-users-0.json` has PBKDF2 hashes that don't match password `"123"`. On every `docker compose down/up`, `--import-realm` reimports the file and resets `mike@other.com`'s password to the wrong hash. Temp workaround: reset via admin API after restart. Permanent fix: replace hashes in `dev-users-0.json` with correctly generated ones for `"123"`, or remove `--import-realm` and implement conditional import.
 
+## Future Ideas
+
+See [TODO.md](TODO.md) for the full list. Highlights:
+
+- **GraalVM native image** — compile Spring Boot apps as native Docker images
+- **Spring Cloud Config** — externalized configuration server
+- **Protobuf** — class generation for binary serialization
+- **Micrometer metrics** — circuit breaker state transition metrics
+- **Distributed tracing** — Micrometer Tracing (Brave/OpenTelemetry)
+- **Admin alerting** — notify on circuit breaker open/closed state changes
+- **Caching layer** — Redis/Caffeine for employee read fallback
+
 ## Existing Guidelines
 
-- `TODO.md` — future ideas (MapStruct, GraalVM, GraphQL, etc.).
+- `TODO.md` — future ideas.
