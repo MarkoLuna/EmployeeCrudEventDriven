@@ -5,7 +5,13 @@ import static java.util.Objects.isNull;
 import com.common.employee.dto.EmployeeMessage;
 import com.common.employee.enums.EmployeeStatus;
 import com.common.employee.exceptions.EmployeeNotFound;
+import com.employee.entities.DeadLetterMessage;
 import com.employee.exceptions.RetryableMessagingException;
+import com.employee.repositories.DeadLetterRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.Instant;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -24,6 +30,10 @@ public class KafkaConsumer {
   private final EmployeeService employeeService;
 
   private final DeduplicationService deduplicationService;
+
+  private final DeadLetterRepository deadLetterRepository;
+
+  private final ObjectMapper objectMapper;
 
   @KafkaListener(
       topics = "${kafka.consumer.employee-upsert-topic}",
@@ -127,22 +137,79 @@ public class KafkaConsumer {
   }
 
   /**
-   * Handles DLT messages.
+   * Handles DLT messages for employee deletion.
    *
    * @param errorMessage the error message to handle.
    */
   public void handleDltForEmployeeDeletion(Message<?> errorMessage) {
-    // TODO HANDLE DLT
-    log.warn("Employee Deletion kafka dlt listener reached, max retrys: {}", errorMessage);
+    log.warn("Employee Deletion kafka DLT listener reached, max retrys: {}", errorMessage);
+    persistDeadLetter(errorMessage);
   }
 
   /**
-   * Handles DLT messages.
+   * Handles DLT messages for employee upsert.
    *
    * @param errorMessage the error message to handle.
    */
   public void handleDltForEmployeeUpsert(Message<?> errorMessage) {
-    // TODO HANDLE DLT
-    log.warn("Employee Upsert kafka dlt listener reached, max retrys: {}", errorMessage);
+    log.warn("Employee Upsert kafka DLT listener reached, max retrys: {}", errorMessage);
+    persistDeadLetter(errorMessage);
+  }
+
+  private void persistDeadLetter(Message<?> errorMessage) {
+    try {
+      var headers = errorMessage.getHeaders();
+      var payload = extractPayload(errorMessage);
+      var exception = headers.get(KafkaHeaders.DLT_EXCEPTION_MESSAGE, String.class);
+      var originalTopic = headers.get(KafkaHeaders.DLT_ORIGINAL_TOPIC, String.class);
+      var partition = headers.get(KafkaHeaders.RECEIVED_PARTITION, Integer.class);
+      var offset = headers.get(KafkaHeaders.OFFSET, Long.class);
+
+      DeadLetterMessage deadLetter =
+          DeadLetterMessage.builder()
+              .topic(Objects.toString(originalTopic, "unknown"))
+              .partition(partition != null ? partition : 0)
+              .offset(offset != null ? offset : 0)
+              .employeeId(extractEmployeeId(payload))
+              .operationType(extractOperationType(payload))
+              .payload(payload)
+              .errorMessage(Objects.toString(exception, "unknown"))
+              .failedAt(Instant.now())
+              .build();
+
+      deadLetterRepository.insert(deadLetter);
+      log.info("Persisted dead letter message to MongoDB: {}", deadLetter.getId());
+    } catch (Exception e) {
+      log.error("Failed to persist dead letter message to MongoDB", e);
+    }
+  }
+
+  private String extractPayload(Message<?> errorMessage) {
+    var payloadObj = errorMessage.getPayload();
+    try {
+      return objectMapper.writeValueAsString(payloadObj);
+    } catch (JsonProcessingException e) {
+      return Objects.toString(payloadObj, "unknown");
+    }
+  }
+
+  private String extractEmployeeId(String payload) {
+    try {
+      var node = objectMapper.readTree(payload);
+      var id = node.path("employeeId").asText(null);
+      return id != null ? id : "unknown";
+    } catch (Exception e) {
+      return "unknown";
+    }
+  }
+
+  private String extractOperationType(String payload) {
+    try {
+      var node = objectMapper.readTree(payload);
+      var op = node.path("operationType").asText(null);
+      return op != null ? op : "unknown";
+    } catch (Exception e) {
+      return "unknown";
+    }
   }
 }

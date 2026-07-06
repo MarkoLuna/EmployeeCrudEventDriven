@@ -19,6 +19,7 @@ This directory provides two main Docker Compose configurations:
 | **Reverse Proxy** | Nginx | `8080` | Entry point for services and authentication |
 | **Producer** | Spring Boot | `8083` | Employee Service (REST API + Producer) |
 | **Consumer** | Spring Boot | `8082` | Employee Consumer Service (Persistence) |
+| **Users Service** | Spring Boot | `8084` | User Management (Keycloak Admin Proxy) |
 
 ### ELK Stack (Full Version Only)
 | Service | Technology | Port | Purpose |
@@ -129,6 +130,14 @@ The Nginx proxy (listening on port `8080`) provides the following routes:
 - `/auth/` -> Proxies to Keycloak (`8081`)
 - `/service/` -> Proxies to Employee Service (`8083`)
 - `/consumer/` -> Proxies to Employee Service Consumer (`8082`)
+- `/users/` -> Proxies to Users Service (`8084`)
+
+### Resilience Configuration
+Nginx is configured with the following fault tolerance settings:
+- **Connect timeout**: 5 seconds
+- **Read timeout**: 30 seconds
+- **Send timeout**: 10 seconds
+- **Upstream retry**: On `error`, `timeout`, `502`, `503`, `504` (up to 3 attempts within 10s)
 
 *Note: Access them via `http://localstack.lks.com:8080/[path]`.*
 

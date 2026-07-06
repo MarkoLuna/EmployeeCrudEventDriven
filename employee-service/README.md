@@ -12,8 +12,14 @@ The **Employee Service** is the entry point for all user interactions in the Emp
 - **Framework**: Spring Boot 3.4.4
 - **Messaging**: Spring Kafka (Producer)
 - **Client**: Spring Cloud OpenFeign
+- **Fault Tolerance**: Resilience4j (Circuit Breaker, Retry, TimeLimiter), Spring Retry
 - **Security**: Spring Security OAuth2 Resource Server
 - **Documentation**: SpringDoc OpenAPI (Swagger UI)
+
+## Fault Tolerance
+- **Circuit Breaker**: `employeeConsumer` instance wraps `list()` and `getEmployee()` Feign calls. Opens on 50% failure rate (10-call window), recovers after 30s. Fallback returns empty page on LIST, `503` on GET.
+- **Feign Timeout**: 5s connect / 10s read.
+- **Retry**: GET-only, up to 3 attempts (method-aware).
 
 ## Getting Started
 

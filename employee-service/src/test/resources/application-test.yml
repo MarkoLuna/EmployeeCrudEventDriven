@@ -10,3 +10,32 @@ spring:
         jwt:
           # issuer-uri: false
           issuer-uri: http://localhost:8081/realms/dev
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-size: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 5s
+        permitted-number-of-calls-in-half-open-state: 2
+        automatic-transition-from-open-to-half-open-enabled: true
+        record-exceptions:
+          - java.util.concurrent.TimeoutException
+          - feign.RetryableException
+    instances:
+      employeeConsumer:
+        base-config: default
+  timelimiter:
+    instances:
+      employeeConsumer:
+        timeout-duration: 5s
+        cancel-running-future: true
+  retry:
+    instances:
+      employeeConsumer:
+        max-attempts: 2
+        wait-duration: 100ms
+        retry-exceptions:
+          - feign.RetryableException
+          - java.util.concurrent.TimeoutException

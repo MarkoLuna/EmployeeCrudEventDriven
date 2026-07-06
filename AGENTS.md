@@ -17,6 +17,7 @@
 - **Security**: Keycloak (v26.1.2) on management port 9000, OAuth2/OIDC/JWT, Spring Security 6.4.4
 - **Databases & Messaging**: Apache Kafka, PostgreSQL (Keycloak/internal), MongoDB, Spring Data JPA & MongoDB
 - **APIs & Docs**: OpenAPI 3/Swagger UI (`springdoc-openapi-starter-webmvc-ui` v2.8.6), Feign
+- **Fault Tolerance**: Resilience4j 2.3.0 (`resilience4j-spring-boot3`), Spring Retry 2.0.11
 - **Infra & Tooling**: Docker & Docker Compose, Nginx, Bruno (`EmployeeCrud/` directory)
 
 ## Architecture (CQRS-lite + EDA)
@@ -29,11 +30,25 @@
 | `employee-api` | Shared DTOs, enums, exceptions (JAR dep) | — | — |
 
 - **Writes** (POST/PUT/DELETE): producer validates → publishes to Kafka → returns 202 → consumer persists.
-- **Reads** (GET/LIST): producer calls consumer synchronously via Feign (JWT forwarded).
+- **Reads** (GET/LIST): producer calls consumer synchronously via Feign (JWT forwarded), protected by **Resilience4j Circuit Breaker** + fallback.
 - **EDA & Idempotency**: Use EDA for state changes. Consumer event handlers must be idempotent to prevent duplicate processing.
 - **Kafka Topics**: Named `<resource>-<action>.<version>` (e.g., `employee-upsert.v1`, `employee-deletion.v1`). 1 partition, 1 replica.
 - **Kafka Headers**: Include correlation IDs and timestamps in Kafka headers for traceability.
-- **Consumer Retry**: Uses non-blocking retry (max 3, 5m backoff) with DLT; retries only `RetryableMessagingException`.
+- **Consumer Retry**: Uses non-blocking retry (max 3, 5m backoff) with DLT; retries only `RetryableMessagingException`. DLT messages are persisted to MongoDB `dead_letter_queue`.
+
+### Fault Tolerance Patterns
+
+| Service | Pattern | Mechanism | Config |
+|---|---|---|---|
+| `employee-service` | Circuit Breaker | `@CircuitBreaker(name = "employeeConsumer", fallbackMethod = ...)` on `list()` and `getEmployee()` | 10-window, 50% threshold, 30s open |
+| `employee-service` | Timeout (Feign) | `Request.Options(5s connect, 10s read)` | `FeignClientsConfig.java` |
+| `employee-service` | Retry (Feign) | `MethodAwareRetryer` (GET-only, max 3) | `FeignClientsConfig.java` |
+| `users-service` | Circuit Breaker | `@CircuitBreaker(name = "keycloak", fallbackMethod = ...)` on all 6 operations | 10-window, 50% threshold, 30s open |
+| `users-service` | Timeout (Feign) | `Request.Options(5s connect, 10s read)` | `FeignClientsConfig.java` |
+| `users-service` | Retry (Feign) | `MethodAwareRetryer` (GET-only, max 3) | `FeignClientsConfig.java` |
+| `employee-service-consumer` | Non-blocking retry | Spring Kafka `RetryTopicConfiguration`, max 3, 5m backoff | `KafkaConsumerConfig.java` |
+| `employee-service-consumer` | DLT persistence | `DeadLetterRepository` persists failed messages to MongoDB | `KafkaConsumer.java` |
+| Nginx | Reverse proxy retry | `proxy_next_upstream`, 5s connect, 30s read | `default.conf` |
 
 ## Run Locally
 

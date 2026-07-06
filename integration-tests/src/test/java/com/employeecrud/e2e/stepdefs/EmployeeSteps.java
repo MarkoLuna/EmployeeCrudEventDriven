@@ -140,6 +140,19 @@ public class EmployeeSteps {
         .contains("\"pageSize\"");
   }
 
+  @Given("the employee consumer service is unavailable")
+  public void consumerIsUnavailable() {
+    // This step is intentionally left empty.
+    // To execute this scenario, the employee-service-consumer must be taken down
+    // or the circuit breaker must be in an open state.
+    // Example: docker compose stop employee-service-consumer
+  }
+
+  @Then("the response should contain an empty employee list")
+  public void assertEmptyEmployeeList() {
+    assertThat(context.getLastResponseBody()).contains("\"content\":[]");
+  }
+
   private void fetchCreatedEmployeeId(String firstName) {
     var deadline = System.currentTimeMillis() + Duration.ofSeconds(10).toMillis();
     while (System.currentTimeMillis() < deadline) {
@@ -149,13 +162,13 @@ public class EmployeeSteps {
               .auth()
               .oauth2(context.getAuthToken())
               .when()
-              .get(properties.getEmployeeService().getBaseUrl() + "/employees/0/10")
+              .get(properties.getEmployeeService().getBaseUrl() + "/employees/0/100")
               .then()
               .extract()
               .response();
       var ids = response.jsonPath().getList("content.id");
       var firstNames = response.jsonPath().getList("content.firstName");
-      if (firstNames != null) {
+      if (firstNames != null && ids != null) {
         for (int i = 0; i < firstNames.size(); i++) {
           if (firstName.equals(firstNames.get(i))) {
             context.setCreatedEmployeeId((String) ids.get(i));

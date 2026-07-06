@@ -1,10 +1,11 @@
 # Employee CRUD Event-Driven System
 
-An event-driven microservices application for managing employee records, featuring asynchronous processing, OAuth2 security, and multi-database persistence.
+An event-driven microservices application for managing employee records, featuring asynchronous processing, OAuth2 security, multi-database persistence, and resilient inter-service communication.
 
 ## Table of Contents
 - [Introduction](#introduction)
 - [Architecture](#architecture)
+- [Fault Tolerance](#fault-tolerance)
 - [Project Structure](#project-structure)
 - [Requirements](#requirements)
 - [How to Run Locally](#how-to-run-locally)
@@ -16,7 +17,7 @@ An event-driven microservices application for managing employee records, featuri
 ---
 
 ## Introduction
-This project demonstrates a modern, scalable approach to CRUD operations using an **Event-Driven Architecture (EDA)**. Instead of traditional synchronous persistence, the system decoupling operations via **Apache Kafka**, ensuring high availability and system resilience.
+This project demonstrates a modern, scalable approach to CRUD operations using an **Event-Driven Architecture (EDA)**. Instead of traditional synchronous persistence, the system decouples operations via **Apache Kafka**, ensuring high availability and system resilience. Inter-service communication is hardened with **Resilience4j** circuit breakers, timeouts, and retry mechanisms.
 
 ---
 
@@ -25,28 +26,90 @@ The system is composed of several decoupled components:
 
 1.  **Employee Service (Producer)**:
     - Exposes REST APIs for Employee management.
-    - **Read Operations**: Queries the Employee Service Consumer via REST (Feign) for GET and LIST requests.
+    - **Read Operations**: Queries the Employee Service Consumer via REST (Feign) for GET and LIST requests, protected by a **Resilience4j Circuit Breaker** (`employeeConsumer`) with fallback to empty pages.
     - **Write Operations**: Validates requests and publishes events to Kafka for CREATE, UPDATE, and DELETE.
     - Acts as an OAuth2 Resource Server.
+    - Feign client configured with **5s connect / 10s read timeouts** and a **method-aware retryer** (GET-only, up to 3 attempts).
 2.  **Employee Service Consumer (Consumer)**:
     - Listens to Kafka topics (`employee-upsert.v1`, `employee-deletion.v1`).
     - Handles data persistence and background tasks.
+    - **Non-blocking retries** (max 3, 5m backoff) for transient failures, with **DLT persistence** to MongoDB `dead_letter_queue` collection for unrecoverable messages.
     - **Data Access**: Exposes REST endpoints used by the Producer for read operations.
 3.  **Users Service**:
     - Dedicated microservice for user management.
     - Exposes REST APIs for user CRUD operations.
-    - Communicates with IAM Service (Keycloak) via Feign client.
+    - Communicates with IAM Service (Keycloak) via Feign client, protected by a **Resilience4j Circuit Breaker** (`keycloak`) with fallback to `503 Service Unavailable`.
     - Acts as an OAuth2 Resource Server.
+    - Feign client configured with **5s connect / 10s read timeouts** and a **method-aware retryer** (GET-only, up to 3 attempts).
 4.  **Employee API**:
     - A shared module providing common DTOs, interfaces, and utility classes used by both services.
 5.  **Infrastructure**:
     - **Kafka & Zookeeper**: Message broker for asynchronous event delivery.
     - **Keycloak**: Centralized Identity and Access Management (IAM).
     - **MongoDB & PostgreSQL**: Used for persistent storage.
+    - **Nginx**: Reverse proxy with 5s connect timeout, 30s read timeout, and `proxy_next_upstream` retry on 5xx errors.
 
 ---
 
-## Project Structure
+## Fault Tolerance
+
+The system implements a layered fault tolerance strategy across all inter-service communication channels.
+
+### Resilience4j Circuit Breakers
+
+| Instance | Service | Target | Fallback Behavior |
+|---|---|---|---|
+| `employeeConsumer` | Employee Service | Consumer Feign (reads) | Returns empty page on LIST; throws `503` on GET |
+| `keycloak` | Users Service | Keycloak Feign (all ops) | Returns empty page on LIST; throws `503` on all others |
+
+### Circuit Breaker Config (default)
+- **Sliding window**: 10 calls
+- **Failure threshold**: 50%
+- **Wait duration (open → half-open)**: 30s
+- **Half-open calls**: 3
+- **Recorded exceptions**: `EmployeeServiceConsumerException`, `TimeoutException`, `FeignException`
+
+### Feign Client Resilience
+- **Connect timeout**: 5s
+- **Read timeout**: 10s
+- **Retryer**: GET-only, up to 3 attempts (100ms base, 1s max period)
+
+### Kafka Consumer Resilience
+- **Non-blocking retry**: max 3 attempts, 5m fixed backoff
+- **Retryable exceptions**: `RetryableMessagingException` only
+- **Dead letter topic**: Messages exceeding max retries are sent to DLT
+- **DLT persistence**: Failed messages are persisted to MongoDB `dead_letter_queue` collection for manual inspection
+
+### Nginx Reverse Proxy Resilience
+- **Connect timeout**: 5s
+- **Read timeout**: 30s
+- **Upstream retry**: On `error`, `timeout`, `502`, `503`, `504` (up to 3 attempts)
+
+### Sequence Diagram: Fault Tolerance Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Producer as Employee Service
+    participant CB as Circuit Breaker
+    participant Consumer as Employee Service Consumer
+
+    User->>Producer: GET /employees
+
+    Note over Producer,CB: Normal flow
+    Producer->>CB: listEmployees()
+    CB->>Consumer: Feign call
+    Consumer-->>CB: 200 OK
+    CB-->>Producer: EmployeePage
+    Producer-->>User: 200 OK
+
+    Note over Producer,CB: Circuit open / timeout
+    User->>Producer: GET /employees
+    Producer->>CB: listEmployees()
+    Note over CB: Circuit OPEN or timeout
+    CB-->>Producer: Fallback triggered
+    Producer-->>User: 200 OK (empty page)
+```
 ```text
 .
 ├── docker/                      # Infrastructure configuration (Docker Compose, Keycloak, Nginx)
@@ -150,14 +213,22 @@ Located in `integration-tests/src/test/resources/features/`. See [integration-te
 sequenceDiagram
     participant User
     participant Producer as Employee Service
+    participant CB as Circuit Breaker
     participant Consumer as Employee Service Consumer
     participant DB as MongoDB/PostgreSQL
 
     User->>Producer: GET /employees/{id}
-    Producer->>Consumer: GET /internal/employees/{id} (Feign)
-    Consumer->>DB: Fetch Data
-    DB-->>Consumer: Employee Data
-    Consumer-->>Producer: Employee DTO
+    Producer->>CB: @CircuitBreaker list()/getEmployee()
+    CB->>Consumer: Feign call (5s connect / 10s read)
+    Critical Section
+      Consumer->>DB: Fetch Data
+      DB-->>Consumer: Employee Data
+      Consumer-->>CB: Employee DTO
+    option Failure / Timeout
+      CB-->>Producer: Fallback method invoked
+      Producer-->>User: 200 OK (empty) or 503
+    end
+    CB-->>Producer: Employee DTO
     Producer-->>User: 200 OK
 ```
 
@@ -252,7 +323,7 @@ The IAM Service base URL is configured in `application.yml`:
 ```yaml
 services:
   iam-service:
-    base-url: http://localhost:8082
+    base-url: http://localhost:8081
 ```
 
 The Users Service runs on port 8084 by default.
@@ -297,6 +368,7 @@ The project includes a [Bruno](https://www.usebruno.com/) collection for testing
 - **Security**: Keycloak (OAuth2, OpenID Connect, JWT)
 - **Messaging**: Apache Kafka & Zookeeper
 - **Persistence**: MongoDB, PostgreSQL (Spring Data JPA)
+- **Fault Tolerance**: Resilience4j 2.3.0 (Circuit Breaker, Retry, TimeLimiter), Spring Retry
 - **API Documentation**: SpringDoc OpenAPI (Swagger)
 - **Testing**: Bruno API Client, JUnit 5, Cucumber 7, REST Assured
 - **Infrastructure**: Docker, Nginx

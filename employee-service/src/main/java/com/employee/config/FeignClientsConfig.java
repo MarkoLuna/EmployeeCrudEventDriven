@@ -3,6 +3,7 @@ package com.employee.config;
 import com.employee.clients.EmployeeClient;
 import com.employee.config.feign.AuthorizationInterceptor;
 import com.employee.config.feign.MessageErrorDecoder;
+import com.employee.config.feign.MethodAwareRetryer;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -10,9 +11,12 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import feign.Feign;
 import feign.Logger;
+import feign.Request;
+import feign.Retryer;
 import feign.codec.ErrorDecoder;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
+import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,16 +39,24 @@ public class FeignClientsConfig {
   }
 
   @Bean
+  public Retryer retryer() {
+    return new MethodAwareRetryer(100L, TimeUnit.SECONDS.toMillis(1L), 3);
+  }
+
+  @Bean
   public EmployeeClient employeeClient(
       @Value("${services.employee-service-consumer.base-url}")
           String employeeServiceConsumerBaseUrl,
       ObjectMapper feignObjectMapper,
-      ErrorDecoder errorDecoder) {
+      ErrorDecoder errorDecoder,
+      Retryer retryer) {
     return Feign.builder()
         .encoder(new JacksonEncoder(feignObjectMapper))
         .decoder(new JacksonDecoder(feignObjectMapper))
         .errorDecoder(errorDecoder)
         .requestInterceptor(new AuthorizationInterceptor())
+        .options(new Request.Options(5, TimeUnit.SECONDS, 10, TimeUnit.SECONDS, true))
+        .retryer(retryer)
         .logLevel(Logger.Level.FULL)
         .target(EmployeeClient.class, employeeServiceConsumerBaseUrl);
   }

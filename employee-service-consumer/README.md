@@ -15,6 +15,12 @@ The **Employee Service Consumer** is a critical component of the event-driven Em
 - **Security**: Spring Security OAuth2 Resource Server
 - **Documentation**: Swagger UI (OpenAPI)
 
+## Fault Tolerance
+- **Non-blocking Retry**: Spring Kafka retry topic with max 3 attempts and 5m backoff. Retries only on `RetryableMessagingException`.
+- **Dead Letter Topic**: Messages exceeding max retries are sent to a DLT.
+- **DLT Persistence**: Failed messages are persisted to MongoDB `dead_letter_queue` collection via `DeadLetterRepository` for manual inspection.
+- **Idempotency**: Duplicate messages are detected via `processed_messages` collection with 24h TTL.
+
 ## Getting Started
 
 ### Prerequisites

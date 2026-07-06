@@ -7,15 +7,27 @@ import com.common.employee.dto.EmployeePage;
 import com.common.employee.enums.EmployeeOperationType;
 import com.common.employee.exceptions.EmployeeNotFound;
 import com.employee.clients.EmployeeClient;
+import com.employee.exceptions.EmployeeServiceConsumerException;
 import com.employee.mappers.EmployeeMapper;
+import feign.FeignException;
+import feign.RetryableException;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service for employee read/write operations. Write operations (create, update, delete) publish
+ * events to Kafka asynchronously. Read operations (list, get) call the consumer synchronously via
+ * Feign, protected by a Resilience4j {@link CircuitBreaker} named "employeeConsumer". When the
+ * circuit is open, fallback methods return empty pages or 503 respectively.
+ */
 @Log4j2
 @Service
 @RequiredArgsConstructor
@@ -33,8 +45,27 @@ public class EmployeeService {
    * @param sizePage the page size
    * @return the list of employees
    */
+  @CircuitBreaker(name = "employeeConsumer", fallbackMethod = "listFallback")
   public EmployeePage list(Integer page, Integer sizePage) {
     return employeeClient.listEmployees(page, sizePage);
+  }
+
+  /**
+   * Fallback for {@link #list(Integer, Integer)}. Triggered when the circuit breaker is open or a
+   * Feign exception occurs. Returns an empty employee page.
+   *
+   * @param page the requested page number
+   * @param sizePage the requested page size
+   * @param t the exception that triggered the fallback
+   * @return an empty {@link EmployeePage}
+   */
+  private EmployeePage listFallback(Integer page, Integer sizePage, Throwable t) {
+    log.warn("Circuit breaker or Feign exception in list(), returning empty page", t);
+    return EmployeePage.builder()
+        .pageNumber(page)
+        .pageSize(sizePage)
+        .content(java.util.List.of())
+        .build();
   }
 
   /**
@@ -43,10 +74,40 @@ public class EmployeeService {
    * @param employeeId the employee id
    * @return the employee
    */
+  @CircuitBreaker(name = "employeeConsumer", fallbackMethod = "getEmployeeFallback")
   public EmployeeDto getEmployee(String employeeId) throws EmployeeNotFound {
     return employeeClient
         .getEmployee(employeeId)
         .orElseThrow(() -> new EmployeeNotFound("Unable to find the Employee"));
+  }
+
+  /**
+   * Fallback for {@link #getEmployee(String)}. Distinguishes between circuit-breaker or
+   * network-level exceptions (returns 503) and business exceptions (rethrows original).
+   *
+   * @param employeeId the requested employee id
+   * @param t the exception that triggered the fallback
+   * @return never returns normally; always throws
+   * @throws EmployeeServiceConsumerException when the circuit is open or the consumer is
+   *     unreachable (HTTP 503)
+   * @throws EmployeeNotFound when the consumer replied with 404 (feign.FeignException.NotFound)
+   * @throws RuntimeException the original exception for all other cases
+   */
+  private EmployeeDto getEmployeeFallback(String employeeId, Throwable t) {
+    if (t instanceof CallNotPermittedException || t instanceof RetryableException) {
+      log.warn("Consumer unavailable in getEmployee({}), returning 503", employeeId, t);
+      throw new EmployeeServiceConsumerException(
+          HttpStatus.SERVICE_UNAVAILABLE,
+          "Employee consumer is unavailable, please try again later.");
+    }
+    if (t instanceof FeignException.NotFound) {
+      throw new EmployeeNotFound("Employee not found: " + employeeId);
+    }
+    log.warn("Error in getEmployee({}), rethrowing", employeeId, t);
+    if (t instanceof RuntimeException) {
+      throw (RuntimeException) t;
+    }
+    throw new RuntimeException(t);
   }
 
   /**

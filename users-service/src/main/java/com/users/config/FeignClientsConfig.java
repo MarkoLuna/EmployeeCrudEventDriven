@@ -9,11 +9,15 @@ import com.users.clients.UserClient;
 import com.users.config.feign.AuthorizationInterceptor;
 import com.users.config.feign.LoggingInterceptor;
 import com.users.config.feign.MessageErrorDecoder;
+import com.users.config.feign.MethodAwareRetryer;
 import feign.Feign;
 import feign.Logger;
+import feign.Request;
+import feign.Retryer;
 import feign.codec.ErrorDecoder;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
+import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,16 +40,24 @@ public class FeignClientsConfig {
   }
 
   @Bean
+  public Retryer retryer() {
+    return new MethodAwareRetryer(100L, TimeUnit.SECONDS.toMillis(1L), 3);
+  }
+
+  @Bean
   public UserClient userClient(
       @Value("${services.iam-service.base-url}") String iamServiceBaseUrl,
       ObjectMapper feignObjectMapper,
-      ErrorDecoder errorDecoder) {
+      ErrorDecoder errorDecoder,
+      Retryer retryer) {
     return Feign.builder()
         .encoder(new JacksonEncoder(feignObjectMapper))
         .decoder(new JacksonDecoder(feignObjectMapper))
         .errorDecoder(errorDecoder)
         .requestInterceptor(new AuthorizationInterceptor())
         .logger(new LoggingInterceptor())
+        .options(new Request.Options(5, TimeUnit.SECONDS, 10, TimeUnit.SECONDS, true))
+        .retryer(retryer)
         .logLevel(Logger.Level.FULL)
         .target(UserClient.class, iamServiceBaseUrl);
   }

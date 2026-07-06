@@ -10,8 +10,13 @@ import static org.mockito.Mockito.when;
 import com.users.clients.UserClient;
 import com.users.dto.Credential;
 import com.users.dto.UserCreateRequest;
+import com.users.dto.UserPage;
 import com.users.dto.UserResponse;
 import com.users.dto.UserUpdateRequest;
+import com.users.exceptions.IamServiceException;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -179,5 +185,107 @@ class UserServiceImplTest {
     userService.deleteUser(userId);
 
     verify(userClient).deleteUser(DEFAULT_REALM, userId);
+  }
+
+  @DisplayName("createUser fallback throws IamServiceException with 503 when circuit is OPEN")
+  @Test
+  void createUserFallback_shouldThrowServiceUnavailable() {
+    var request = new UserCreateRequest();
+    var cb = CircuitBreaker.ofDefaults("test");
+    var ex =
+        invokeFallback(
+            "createUserFallback",
+            request,
+            CallNotPermittedException.createCallNotPermittedException(cb));
+    assertThat(ex).isInstanceOf(IamServiceException.class);
+    assertThat(((IamServiceException) ex).getStatusCode())
+        .isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
+  }
+
+  @DisplayName("getUserById fallback throws IamServiceException with 503 when circuit is OPEN")
+  @Test
+  void getUserByIdFallback_shouldThrowServiceUnavailable() {
+    var cb = CircuitBreaker.ofDefaults("test");
+    var ex =
+        invokeFallback(
+            "getUserByIdFallback",
+            "test-id",
+            CallNotPermittedException.createCallNotPermittedException(cb));
+    assertThat(ex).isInstanceOf(IamServiceException.class);
+    assertThat(((IamServiceException) ex).getStatusCode())
+        .isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
+  }
+
+  @DisplayName(
+      "getUserByUsername fallback throws IamServiceException with 503 when circuit is OPEN")
+  @Test
+  void getUserByUsernameFallback_shouldThrowServiceUnavailable() {
+    var cb = CircuitBreaker.ofDefaults("test");
+    var ex =
+        invokeFallback(
+            "getUserByUsernameFallback",
+            "test-user",
+            CallNotPermittedException.createCallNotPermittedException(cb));
+    assertThat(ex).isInstanceOf(IamServiceException.class);
+    assertThat(((IamServiceException) ex).getStatusCode())
+        .isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
+  }
+
+  @DisplayName("getAllUsers fallback returns empty page")
+  @Test
+  void getAllUsersFallback_shouldReturnEmptyPage() throws Exception {
+    var result = invokeFallback("getAllUsersFallback", 0, 10, new RuntimeException("test"));
+    assertThat(result).isInstanceOf(UserPage.class);
+    var page = (UserPage) result;
+    assertThat(page.getContent()).isEmpty();
+    assertThat(page.getPageNumber()).isZero();
+    assertThat(page.getPageSize()).isEqualTo(10);
+  }
+
+  @DisplayName("updateUser fallback throws IamServiceException with 503 when circuit is OPEN")
+  @Test
+  void updateUserFallback_shouldThrowServiceUnavailable() {
+    var request = new UserUpdateRequest();
+    var cb = CircuitBreaker.ofDefaults("test");
+    var ex =
+        invokeFallback(
+            "updateUserFallback",
+            "test-id",
+            request,
+            CallNotPermittedException.createCallNotPermittedException(cb));
+    assertThat(ex).isInstanceOf(IamServiceException.class);
+    assertThat(((IamServiceException) ex).getStatusCode())
+        .isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
+  }
+
+  @DisplayName("deleteUser fallback throws IamServiceException with 503 when circuit is OPEN")
+  @Test
+  void deleteUserFallback_shouldThrowServiceUnavailable() {
+    var cb = CircuitBreaker.ofDefaults("test");
+    var ex =
+        invokeFallback(
+            "deleteUserFallback",
+            "test-id",
+            CallNotPermittedException.createCallNotPermittedException(cb));
+    assertThat(ex).isInstanceOf(IamServiceException.class);
+    assertThat(((IamServiceException) ex).getStatusCode())
+        .isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
+  }
+
+  private Object invokeFallback(String methodName, Object... args) {
+    try {
+      Class<?>[] paramTypes = new Class<?>[args.length];
+      for (int i = 0; i < args.length - 1; i++) {
+        paramTypes[i] = args[i].getClass();
+      }
+      paramTypes[args.length - 1] = Throwable.class;
+      var method = UserServiceImpl.class.getDeclaredMethod(methodName, paramTypes);
+      method.setAccessible(true);
+      return method.invoke(userService, args);
+    } catch (InvocationTargetException e) {
+      return e.getCause();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 }

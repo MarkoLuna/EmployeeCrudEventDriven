@@ -13,7 +13,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,circuitbreakers,retries,timelimiter
 
 ####### resource server configuration properties
 spring:
@@ -41,8 +41,42 @@ services:
   employee-service-consumer:
     base-url: http://localhost:8082
 
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        record-exceptions:
+          - java.util.concurrent.TimeoutException
+          - feign.RetryableException
+    instances:
+      employeeConsumer:
+        base-config: default
+  timelimiter:
+    instances:
+      employeeConsumer:
+        timeout-duration: 10s
+        cancel-running-future: true
+  retry:
+    instances:
+      employeeConsumer:
+        max-attempts: 3
+        wait-duration: 500ms
+        retry-exceptions:
+          - feign.RetryableException
+          - java.util.concurrent.TimeoutException
+
 kafka:
   producer:
     bootstrap-servers: localhost:9092
     employee-upsert-topic: employee-upsert.v1
     employee-deletion-topic: employee-deletion.v1
+    acks: all
+    retries: 3
+    properties:
+      delivery.timeout.ms: 120000
+      request.timeout.ms: 30000
