@@ -23,6 +23,42 @@ springdoc:
   packagesToScan: com.users
   pathsToMatch: /users/**
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,circuitbreakers,retries,timelimiter
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        record-exceptions:
+          - com.users.exceptions.IamServiceException
+          - java.util.concurrent.TimeoutException
+          - feign.FeignException
+    instances:
+      keycloak:
+        base-config: default
+  timelimiter:
+    instances:
+      keycloak:
+        timeout-duration: 10s
+        cancel-running-future: true
+  retry:
+    instances:
+      keycloak:
+        max-attempts: 3
+        wait-duration: 500ms
+        retry-exceptions:
+          - feign.RetryableException
+          - java.util.concurrent.TimeoutException
+
 logging:
   level:
     root: INFO

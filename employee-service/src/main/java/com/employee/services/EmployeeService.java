@@ -7,10 +7,13 @@ import com.common.employee.dto.EmployeePage;
 import com.common.employee.enums.EmployeeOperationType;
 import com.common.employee.exceptions.EmployeeNotFound;
 import com.employee.clients.EmployeeClient;
+import com.employee.exceptions.EmployeeServiceConsumerException;
 import com.employee.mappers.EmployeeMapper;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
@@ -33,8 +36,18 @@ public class EmployeeService {
    * @param sizePage the page size
    * @return the list of employees
    */
+  @CircuitBreaker(name = "employeeConsumer", fallbackMethod = "listFallback")
   public EmployeePage list(Integer page, Integer sizePage) {
     return employeeClient.listEmployees(page, sizePage);
+  }
+
+  private EmployeePage listFallback(Integer page, Integer sizePage, Throwable t) {
+    log.warn("Circuit breaker or Feign exception in list(), returning empty page", t);
+    return EmployeePage.builder()
+        .pageNumber(page)
+        .pageSize(sizePage)
+        .content(java.util.List.of())
+        .build();
   }
 
   /**
@@ -43,10 +56,18 @@ public class EmployeeService {
    * @param employeeId the employee id
    * @return the employee
    */
+  @CircuitBreaker(name = "employeeConsumer", fallbackMethod = "getEmployeeFallback")
   public EmployeeDto getEmployee(String employeeId) throws EmployeeNotFound {
     return employeeClient
         .getEmployee(employeeId)
         .orElseThrow(() -> new EmployeeNotFound("Unable to find the Employee"));
+  }
+
+  private EmployeeDto getEmployeeFallback(String employeeId, Throwable t) {
+    log.warn("Circuit breaker or Feign exception in getEmployee({}), propagating", employeeId, t);
+    throw new EmployeeServiceConsumerException(
+        HttpStatus.SERVICE_UNAVAILABLE,
+        "Employee consumer is unavailable, please try again later.");
   }
 
   /**
