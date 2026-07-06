@@ -120,6 +120,7 @@ sequenceDiagram
 ├── employee-service-consumer/   # Consumer service (Kafka Consumer + Persistence)
 ├── users-service/              # Users service (User Management + IAM Integration)
 ├── integration-tests/           # E2E test suite (Cucumber + REST Assured)
+├── employee-crud-frontend/       # React SPA (employee & user management UI)
 ├── .bruno/                      # Bruno API collection for testing
 ├── pom.xml                      # Root Maven configuration
 └── README.md                    # Project documentation
@@ -130,6 +131,7 @@ sequenceDiagram
 ## Requirements
 - **Java 21**
 - **Maven 3.8+**
+- **Node.js 20+** (required for the frontend — see `employee-crud-frontend/README.md`)
 - **Docker & Docker Compose**
 - **Hosts File**: Add the following entry to your `/etc/hosts`:
   ```text
@@ -363,6 +365,36 @@ The project includes a [Bruno](https://www.usebruno.com/) collection for testing
 
 ---
 
+## Frontend Application
+
+A React SPA is available at [`employee-crud-frontend/`](employee-crud-frontend/) for interacting with the backend services.
+
+### Features
+- OAuth2 login with Keycloak (password grant flow)
+- Employee CRUD (create, list, view, edit, delete)
+- User CRUD with role-based visibility (hidden for users without realm-management roles)
+- Profile page showing the logged-in user's info and roles
+- Responsive layout with navigation sidebar, header (user dropdown), and footer
+- Automatic token refresh via Axios interceptor
+
+### Quick Start (Frontend)
+```bash
+cd employee-crud-frontend
+npm install
+cp .env.local .env      # or cp .env.docker .env
+npm run dev              # http://localhost:5173
+```
+
+### Tech Stack
+- React 19 + Vite 6 + TypeScript 5
+- Tailwind CSS 4 + Lucide React icons
+- React Router 6 + Axios
+- Vitest + React Testing Library
+
+See [`employee-crud-frontend/README.md`](employee-crud-frontend/README.md) for full documentation.
+
+---
+
 ## Technologies Used
 - **Backend**: Spring Boot 3.4.4, Java 21
 - **Security**: Keycloak (OAuth2, OpenID Connect, JWT)
@@ -371,4 +403,5 @@ The project includes a [Bruno](https://www.usebruno.com/) collection for testing
 - **Fault Tolerance**: Resilience4j 2.3.0 (Circuit Breaker, Retry, TimeLimiter), Spring Retry
 - **API Documentation**: SpringDoc OpenAPI (Swagger)
 - **Testing**: Bruno API Client, JUnit 5, Cucumber 7, REST Assured
+- **Frontend**: React 19, Vite 6, TypeScript 5, Tailwind CSS 4, React Router 6, Axios
 - **Infrastructure**: Docker, Nginx

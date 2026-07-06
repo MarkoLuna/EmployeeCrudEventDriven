@@ -19,6 +19,7 @@
 - **APIs & Docs**: OpenAPI 3/Swagger UI (`springdoc-openapi-starter-webmvc-ui` v2.8.6), Feign
 - **Fault Tolerance**: Resilience4j 2.3.0 (`resilience4j-spring-boot3`), Spring Retry 2.0.11
 - **Infra & Tooling**: Docker & Docker Compose, Nginx, Bruno (`EmployeeCrud/` directory)
+- **Frontend**: React 19, Vite 6, TypeScript 5, Tailwind CSS 4, React Router 6, Axios, Vitest
 
 ## Architecture (CQRS-lite + EDA)
 
@@ -28,6 +29,7 @@
 | `employee-service-consumer` | Kafka consumer + MongoDB persistence (reads) | 8082 | 8080 |
 | `users-service` | Keycloak admin proxy (Feign) | 8084 | — |
 | `employee-api` | Shared DTOs, enums, exceptions (JAR dep) | — | — |
+| `employee-crud-frontend` | React SPA (user & employee management) | 5173 | 8080 (via Nginx) |
 
 - **Writes** (POST/PUT/DELETE): producer validates → publishes to Kafka → returns 202 → consumer persists.
 - **Reads** (GET/LIST): producer calls consumer synchronously via Feign (JWT forwarded), protected by **Resilience4j Circuit Breaker** + fallback.
@@ -49,6 +51,25 @@
 | `employee-service-consumer` | Non-blocking retry | Spring Kafka `RetryTopicConfiguration`, max 3, 5m backoff | `KafkaConsumerConfig.java` |
 | `employee-service-consumer` | DLT persistence | `DeadLetterRepository` persists failed messages to MongoDB | `KafkaConsumer.java` |
 | Nginx | Reverse proxy retry | `proxy_next_upstream`, 5s connect, 30s read | `default.conf` |
+
+## Frontend (employee-crud-frontend)
+
+```bash
+cd employee-crud-frontend
+npm install                    # Install JS dependencies
+cp .env.local .env             # or .env.docker for Nginx proxy
+npm run dev                    # Dev server on :5173
+npm run build                  # Production build → dist/
+npm test                       # Run Vitest tests
+npm run lint                   # TypeScript type-check
+```
+
+- **Stack**: React 19, Vite 6, TypeScript 5, Tailwind CSS 4, React Router 6, Axios, Vitest
+- **Auth**: Keycloak password grant → JWT stored in localStorage, auto-refreshed via Axios interceptor
+- **Role-based UI**: Users nav item hidden unless JWT has `realm-management` client roles
+- **Env**: `VITE_AUTH_URL`, `VITE_EMPLOYEE_API_URL`, `VITE_USERS_API_URL`, `VITE_CLIENT_ID`, `VITE_CLIENT_SECRET`
+- Build is static (`dist/` folder) — deploy behind the same Nginx that proxies `/service/`, `/users/`, `/auth/`
+- See `employee-crud-frontend/README.md` for full docs
 
 ## Run Locally
 
