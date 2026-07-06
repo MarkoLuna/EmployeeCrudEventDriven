@@ -27,3 +27,6 @@ bin/
 /dist/
 /nbdist/
 
+# FE app
+employee-crud-frontend/node_modules/
+
