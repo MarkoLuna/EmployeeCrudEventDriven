@@ -31,7 +31,7 @@ services:
     ports:
       - "8083:8080"
     environment:
-      - "JAVA_OPTS=${JAVA_ARGS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+      - "JAVA_OPTS=-Xmx512m -Xms256m -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
       - "SPRING_PROFILES_ACTIVE=docker"
     healthcheck:
       test: curl --fail http://localhost:8080/actuator/health || exit 1
@@ -57,7 +57,7 @@ services:
     ports:
       - "8082:8080"
     environment:
-      - "JAVA_OPTS=${JAVA_ARGS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+      - "JAVA_OPTS=-Xmx512m -Xms256m -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
       - "SPRING_PROFILES_ACTIVE=docker"
     healthcheck:
       test: curl --fail http://localhost:8080/actuator/health || exit 1
@@ -85,7 +85,7 @@ services:
     ports:
       - "8084:8080"
     environment:
-      - "JAVA_OPTS=${JAVA_ARGS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+      - "JAVA_OPTS=-Xmx512m -Xms256m -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
       - "SPRING_PROFILES_ACTIVE=docker"
     healthcheck:
       test: curl --fail http://localhost:8080/actuator/health || exit 1
