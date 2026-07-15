@@ -5,11 +5,17 @@ import feign.RetryableException;
 import feign.Retryer;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Retryer that only retries GET requests
+ */
 public class MethodAwareRetryer implements Retryer {
 
   private final Retryer.Default delegate;
   private final int maxAttempts;
 
+  /**
+   * Default constructor with 100ms period, 1ms max period, and 3 attempts
+   */
   public MethodAwareRetryer() {
     this(100, TimeUnit.MILLISECONDS.toMillis(1), 3);
   }

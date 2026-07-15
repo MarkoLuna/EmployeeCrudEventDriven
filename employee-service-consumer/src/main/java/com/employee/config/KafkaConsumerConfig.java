@@ -26,10 +26,19 @@ import org.springframework.kafka.support.serializer.DelegatingByTypeSerializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
+/**
+ * Configuration for Kafka consumer
+ */
 @EnableKafka
 @Configuration
 public class KafkaConsumerConfig {
 
+  /**
+   * Creates a consumer factory for Kafka
+   * 
+   * @param kafkaConfigProperties Kafka configuration properties
+   * @return Consumer factory for Kafka
+   */
   @Bean
   public ConsumerFactory<String, EmployeeMessage> employeeConsumerFactory(
       KafkaConfigProperties kafkaConfigProperties) {
@@ -41,6 +50,13 @@ public class KafkaConsumerConfig {
         props, new StringDeserializer(), new JsonDeserializer<>(EmployeeMessage.class));
   }
 
+  /**
+   * Creates a concurrent Kafka listener container factory for employee upsert operations
+   * 
+   * @param employeeConsumerFactory Consumer factory for Kafka
+   * @param kafkaConfigProperties Kafka configuration properties
+   * @return Concurrent Kafka listener container factory for employee upsert operations
+   */
   @Bean
   public ConcurrentKafkaListenerContainerFactory<String, EmployeeMessage>
       employeeKafkaListenerContainerFactory(
@@ -89,6 +105,15 @@ public class KafkaConsumerConfig {
         "handleDltForEmployeeUpsert");
   }
 
+  /**
+   * Builds a retry configuration for Kafka
+   * 
+   * @param employeeKafkaTemplate Kafka template for employee upsert operations
+   * @param kafkaConfigProperties Kafka configuration properties
+   * @param topic                 Topic to retry
+   * @param dltHandler            DLT handler method
+   * @return Retry configuration for Kafka
+   */
   private RetryTopicConfiguration buildRetryConfig(
       KafkaTemplate<String, Object> employeeKafkaTemplate,
       KafkaConfigProperties kafkaConfigProperties,
@@ -106,12 +131,24 @@ public class KafkaConsumerConfig {
         .create(employeeKafkaTemplate);
   }
 
+  /**
+   * Creates a Kafka template for employee upsert operations
+   * 
+   * @param employeeProducerFactory Producer factory for Kafka
+   * @return Kafka template for employee upsert operations
+   */
   @Bean
   public KafkaTemplate<String, Object> employeeKafkaTemplate(
       ProducerFactory<String, Object> employeeProducerFactory) {
     return new KafkaTemplate<>(employeeProducerFactory);
   }
 
+  /**
+   * Creates a producer factory for Kafka
+   * 
+   * @param kafkaConfigProperties Kafka configuration properties
+   * @return Producer factory for Kafka
+   */
   @Bean
   public ProducerFactory<String, Object> employeeProducerFactory(
       KafkaConfigProperties kafkaConfigProperties) {

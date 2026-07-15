@@ -22,6 +22,19 @@ interface DataTableProps<T> {
   actions?: (item: T) => ReactNode
 }
 
+/**
+ * Data table component
+ * @param {Column<T>} columns - Column definitions
+ * @param {T[]} data - Data to display
+ * @param {(item: T) => string} keyExtractor - Function to extract key
+ * @param {boolean} loading - Whether data is loading
+ * @param {string | null} error - Error message
+ * @param {function(): void} onRetry - Callback for retry action
+ * @param {string} emptyTitle - Title for empty state
+ * @param {string | undefined} emptyDescription - Description for empty state
+ * @param {(item: T) => ReactNode} actions - Actions to display
+ * @returns {ReactNode}
+ */
 export function DataTable<T>({
   columns,
   data,

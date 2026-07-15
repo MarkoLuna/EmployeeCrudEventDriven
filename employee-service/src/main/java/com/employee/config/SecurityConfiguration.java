@@ -15,16 +15,28 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 
-/** Security Configuration Class. */
+/** Security Configuration class. */
 @Log4j2
 @Configuration
 public class SecurityConfiguration {
 
+  /**
+   * Creates a session authentication strategy
+   * 
+   * @return Session authentication strategy
+   */
   @Bean
   protected SessionAuthenticationStrategy sessionAuthenticationStrategy() {
     return new RegisterSessionAuthenticationStrategy(new SessionRegistryImpl());
   }
 
+  /**
+   * Creates a security filter chain
+   * 
+   * @param http Http security
+   * @return Security filter chain
+   * @throws Exception If an error occurs
+   */
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
@@ -36,6 +48,11 @@ public class SecurityConfiguration {
     return http.build();
   }
 
+  /**
+   * Creates a web security customizer
+   * 
+   * @return Web security customizer
+   */
   @Bean
   public WebSecurityCustomizer webSecurityCustomizer() {
     return web ->
@@ -43,6 +60,12 @@ public class SecurityConfiguration {
             .requestMatchers("/error", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html");
   }
 
+  /**
+   * Creates a JWT decoder
+   * 
+   * @param properties OAuth2 resource server properties
+   * @return JWT decoder
+   */
   @Bean
   JwtDecoder jwtDecoder(OAuth2ResourceServerProperties properties) {
     String issuerUri = properties.getJwt().getIssuerUri();

@@ -1,5 +1,16 @@
 import { Modal } from './Modal'
 
+/**
+ * Interface for confirm dialog
+ * @property {boolean} open - Whether the dialog is open
+ * @property {string} title - Dialog title
+ * @property {string} message - Dialog message
+ * @property {string} confirmLabel - Confirm button label
+ * @property {string} cancelLabel - Cancel button label
+ * @property {function(): void} onConfirm - Callback for confirm action
+ * @property {function(): void} onCancel - Callback for cancel action
+ * @property {boolean} loading - Whether the dialog is loading
+ */
 interface ConfirmDialogProps {
   open: boolean
   title: string
@@ -11,6 +22,18 @@ interface ConfirmDialogProps {
   loading?: boolean
 }
 
+/**
+ * Confirm dialog component
+ * @param {boolean} open - Whether the dialog is open
+ * @param {string} title - Dialog title
+ * @param {string} message - Dialog message
+ * @param {string} confirmLabel - Confirm button label
+ * @param {string} cancelLabel - Cancel button label
+ * @param {function(): void} onConfirm - Callback for confirm action
+ * @param {function(): void} onCancel - Callback for cancel action
+ * @param {boolean} loading - Whether the dialog is loading
+ * @returns {ReactNode}
+ */
 export function ConfirmDialog({
   open,
   title,

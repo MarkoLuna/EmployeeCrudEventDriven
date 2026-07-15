@@ -28,6 +28,10 @@ function Layout() {
   )
 }
 
+/**
+ * Main application component
+ * @returns {ReactNode}
+ */
 export default function App() {
   return (
     <BrowserRouter>

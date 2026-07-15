@@ -13,9 +13,18 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
+/**
+ * Configuration for Kafka producer
+ */
 @Configuration
 public class KafkaProducerConfig {
 
+  /**
+   * Creates a producer factory for Kafka
+   * 
+   * @param kafkaConfigProperties Kafka configuration properties
+   * @return Producer factory for Kafka
+   */
   @Bean
   public ProducerFactory<String, EmployeeMessage> producerFactory(
       KafkaConfigProperties kafkaConfigProperties) {
@@ -28,6 +37,13 @@ public class KafkaProducerConfig {
     return new DefaultKafkaProducerFactory<>(configProps);
   }
 
+  /**
+   * Creates a Kafka template for employee upsert operations
+   * 
+   * @param producerFactory   Producer factory for Kafka
+   * @param kafkaConfigProperties Kafka configuration properties
+   * @return Kafka template for employee upsert operations
+   */
   @Bean
   public KafkaTemplate<String, EmployeeMessage> employeeUpsertKafkaTemplate(
       ProducerFactory<String, EmployeeMessage> producerFactory,
@@ -39,6 +55,13 @@ public class KafkaProducerConfig {
     return kafkaTemplate;
   }
 
+  /**
+   * Creates a Kafka template for employee deletion operations
+   * 
+   * @param producerFactory   Producer factory for Kafka
+   * @param kafkaConfigProperties Kafka configuration properties
+   * @return Kafka template for employee deletion operations
+   */
   @Bean
   public KafkaTemplate<String, EmployeeMessage> employeeDeletionKafkaTemplate(
       ProducerFactory<String, EmployeeMessage> producerFactory,

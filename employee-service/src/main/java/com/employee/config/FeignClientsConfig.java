@@ -21,9 +21,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Configuration for Feign clients
+ */
 @Configuration
 public class FeignClientsConfig {
 
+  /**
+   * Creates an ObjectMapper for Feign
+   * @return ObjectMapper configured for Feign
+   */
   @Bean
   public ObjectMapper feignObjectMapper() {
     return new ObjectMapper()
@@ -33,16 +40,32 @@ public class FeignClientsConfig {
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
   }
 
+  /**
+   * Creates an error decoder for Feign
+   * @return ErrorDecoder for Feign
+   */
   @Bean
   public ErrorDecoder errorDecoder() {
     return new MessageErrorDecoder();
   }
 
+  /**
+   * Creates a retryer for Feign
+   * @return Retryer for Feign
+   */
   @Bean
   public Retryer retryer() {
     return new MethodAwareRetryer(100L, TimeUnit.SECONDS.toMillis(1L), 3);
   }
 
+  /**
+   * Creates the Employee client
+   * @param employeeServiceConsumerBaseUrl Base URL for employee service
+   * @param feignObjectMapper ObjectMapper for Feign
+   * @param errorDecoder ErrorDecoder for Feign
+   * @param retryer Retryer for Feign
+   * @return Employee client
+   */
   @Bean
   public EmployeeClient employeeClient(
       @Value("${services.employee-service-consumer.base-url}")

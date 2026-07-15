@@ -9,10 +9,20 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import org.springframework.http.HttpStatus;
 
+/**
+ * Decodes Feign errors to specific exceptions
+ */
 public class MessageErrorDecoder implements ErrorDecoder {
 
   private final ErrorDecoder errorDecoder = new Default();
 
+  /**
+   * Decodes the Feign error
+   * 
+   * @param methodKey The method key
+   * @param response  The response
+   * @return The exception
+   */
   @Override
   public Exception decode(String methodKey, Response response) {
     String error =

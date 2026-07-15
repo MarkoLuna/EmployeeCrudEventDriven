@@ -6,9 +6,17 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Configuration for Jackson ObjectMapper
+ */
 @Configuration
 public class JacksonConfig {
 
+  /**
+   * Creates an ObjectMapper with Java 8 and Java 10+ modules
+   * 
+   * @return ObjectMapper configured with Java 8 and Java 10+ modules
+   */
   @Bean
   public ObjectMapper objectMapper() {
     ObjectMapper objectMapper = new ObjectMapper();

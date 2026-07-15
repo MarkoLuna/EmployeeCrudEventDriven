@@ -1,5 +1,8 @@
 /// <reference types="vite/client" />
 
+/**
+ * Interface for environment variables
+ */
 interface ImportMetaEnv {
   readonly VITE_AUTH_URL: string
   readonly VITE_EMPLOYEE_API_URL: string
